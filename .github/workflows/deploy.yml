@@ -51,10 +51,12 @@ jobs:
           build_dir: output
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout gh-pages branch
+      - uses: actions/checkout@v2
+        with:
+          ref: gh-pages
       - name: Add .nojekyll to gh-pages branch
-        run: |
-          git checkout gh-pages
-          touch .nojekyll
+        run:  touch .nojekyll
       - name: Commit files
         run: |
           git config --local user.email "jegpub@gmail.com"
