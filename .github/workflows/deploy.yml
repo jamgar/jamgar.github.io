@@ -53,6 +53,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Add .nojekyll to gh-pages branch
         run: touch .nojekyll
+        with:
+          target_branch: gh-pages
       - name: Commit files
         run: |
           git config --local user.email "jegpub@gmail.com"
@@ -63,6 +65,5 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           target_branch: gh-pages
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
