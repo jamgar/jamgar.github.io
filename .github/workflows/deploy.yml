@@ -49,5 +49,17 @@ jobs:
         with:
           target_branch: gh-pages
           build_dir: output
+      - name: Add .nojekyll to gh-pages branch
+        run: touch .nojekyll
+      - name: Commit files
+        run: |
+          git config --local user.email "jegpub@gmail.com"
+          git config --local user.name "jamgar"
+          git add .
+          git commit -m "Add .nojekyll"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          target_branch: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
