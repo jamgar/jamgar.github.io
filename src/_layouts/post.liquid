@@ -1,0 +1,22 @@
+---
+layout: default
+---
+
+<article class="h-entry mt-4">
+  <h1 class="title has-text-centered">{{ page.title }}</h1>
+
+  <section class="section">
+    <div class="container">
+      {%- assign author = site.metadata.author %}
+      {%- if author %}
+        <div class="mb-6 author has-text-centered p-author">
+          {{ author }}
+        </div>
+      {%- endif %}
+
+      <div class="content e-content">
+        {{ content }}
+      </div>
+    </div>
+  </section>
+</article>

@@ -1,0 +1,29 @@
+<div class="columns is-multiline">
+  {% for resource in collection %}
+    <div class="column is-full-mobile is-full-tablet is-half-desktop">
+      <div class="box document-entry">
+        <div class="content">
+          <h3>
+            <a class="is-decorationless has-text-black-ter" href="{{ resource.relative_url }}">
+              {{ resource.title | smartify }}
+            </a>
+          </h3>
+          {% if resource.subtitle and resource.subtitle != "" %}
+            {% assign excerpt = resource.subtitle | smartify | prepend: "<p>" | append: "</p>" %}
+          {% elsif resource.description and resource.description != "" %}
+            {% assign excerpt = resource.description | smartify | prepend: "<p>" | append: "</p>" %}
+          {% else %}
+            {% assign excerpt = resource.excerpt %}
+          {% endif %}
+          {{ excerpt }}
+          <p class="mt-5">
+            <a href="{{ resource.relative_url }}" class="button is-link is-inverted">
+              <span>Read More</span>
+              <span class="icon"><ion-icon name="chevron-forward-outline"></ion-icon></span>
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
