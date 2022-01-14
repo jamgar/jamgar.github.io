@@ -49,6 +49,8 @@ jobs:
         with:
           target_branch: gh-pages
           build_dir: output
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Add .nojekyll to gh-pages branch
         run: touch .nojekyll
       - name: Commit files
