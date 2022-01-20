@@ -34,3 +34,21 @@ layout: home
     </div>
   </div>
 </section>
+<section class="section">
+  <div class="container">
+    <div class="content">
+      <h1 class="my-5 title has-text-centered">Projects</h1>
+
+      {% assign projects = collections.projects.resources | slice: 0, 6 %} {% render "collection", collection: projects, metadata: site.metadata %}
+
+      {% if collections.projects.resources.size > 6 %}
+      <div class="has-text-right">
+        <a href="/posts/" class="button is-outlined">
+          <span>Previous Projects</span>
+          <span class="icon"><ion-icon name="chevron-forward-outline"></ion-icon></span>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
