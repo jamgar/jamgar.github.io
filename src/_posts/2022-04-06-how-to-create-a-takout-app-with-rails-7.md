@@ -6,7 +6,7 @@ date:   2022-04-06
 categories: rails
 ---
 
-We will go through building a simple online order takeout app using Rails 7. A user will be presented with a menu and then they can add items to the cart. When they are finished adding items to their cart they will go to the checkout page and pay. Once the user pays then the order they are presented with a confirmation page, and the order will show up in real time, on the orders page to be fullfilled by the server. 
+We will go through building a simple online order takeout app using Rails 7. A user will be presented with a menu and then they can add items to the cart. When they are finished adding items to their cart they will go to the checkout page and pay. Once the user pays then the order they are presented with a confirmation page, and the order will show up in real time, on the orders page to be fullfilled by the server. The completed repo is [here](https://github.com/jamgar/takeoutapp)
 
 The idea is to get to use Hotwire, that comes with Rails 7, in a different scenario than a chat app. I won't go into detail on how it works, but if you are interested in learning more I would recommend this free resource [Hotrails](https://www.hotrails.dev/) by Alexandre.
 
