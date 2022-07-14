@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "How to dismiss flash messages with turbo"
-subtitle:
-date:   2022-07-11
+title: How to dismiss flash messages with Rails turbo
+subtitle: null
+date: 2022-07-11
 categories: rails
 ---
 
