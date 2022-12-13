@@ -2,7 +2,7 @@
 layout: project
 title: "Social Connect 6"
 image: "/images/socialconnect6_hero.png"
-link: "https://peaceful-dawn-69511.herokuapp.com/"
+link: "https://github.com/jamgar/socialconnect6"
 github: "https://github.com/jamgar/socialconnect6"
 categories: rails
 ---
