@@ -2,24 +2,27 @@
 layout: default
 ---
 
-<article class="h-entry mt-4">
-  <h1 class="title has-text-centered">{{ page.title }}</h1>
+<article class="mt-4 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  {{ page.title }}
+  </h1>
 
-  <section class="section">
-    <div class="container">
+  <section class="">
+    <div class="mb-4">
       {%- assign author = site.metadata.author %}
       {%- if author %}
-        <div class="mb-6 author has-text-centered p-author">
+        <div class="text-xl font-bold text-gray-900 ">
           {{ author }}
         </div>
       {%- endif %}
-      <div class="has-text-centered is-size-7">
+      <div class="text-base font-light text-gray-500">
         {{ page.date }}
       </div>
 
-      <div class="content e-content">
-        {{ content }}
-      </div>
+    </div>
+    <div class="">
+      {{ content }}
     </div>
   </section>
 </article>
+
