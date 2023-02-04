@@ -5,13 +5,13 @@ layout: home
 <section class="h-full py-20 bg-amber-300">
   <div class="flex flex-col px-4 py-8 justify-center items-center sm:flex-row">
     <div class="w-48 mr-8">
-      <img class="rounded-full" src="/images/photo_at_beach_profile.jpg">
+      <img class="shadow-lg rounded-full" src="/images/photo_at_beach_profile.jpg">
     </div>
     <div class="text-center subpixel-antialiased sm:text-left">
         <h1 class="mb-4 text-6xl font-extrabold text-gray-800 tracking-tight leading-none xl:text-8xl">
           Hi! I am James Garcia.
         </h1>
-        <p class="font-light text-gray-700 font-medium md:text-lg lg:text-xl">
+        <p class="text-gray-700 font-medium md:text-lg lg:text-xl">
           I am a <span class="text-red-500 font-semibold">Ruby on Rails 💎</span> developer, and JavaScript is cool too. 😃
         </p>
     </div>
