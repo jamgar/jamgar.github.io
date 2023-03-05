@@ -19,3 +19,6 @@ Future features:
 - Paid subscription where users
 - Can have other contributors
 - Can have unlimited collections
+
+
+
