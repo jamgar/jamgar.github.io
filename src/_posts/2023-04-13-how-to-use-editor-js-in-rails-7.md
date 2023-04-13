@@ -11,3 +11,4 @@ I﻿n this article I will step through adding [Editor.Js](https://editorjs.io/) 
 `﻿``ruby
 r﻿ails new editor-js-app --javascript=esbuild
 `﻿``
+
