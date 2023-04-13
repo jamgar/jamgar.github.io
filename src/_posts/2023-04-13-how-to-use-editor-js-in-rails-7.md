@@ -29,5 +29,11 @@ class CreateArticles < ActiveRecord::Migration[7.0]
   end
 end
 `﻿``
+A﻿fter saving changes to the migration file run `rails db:migrate`.
+
+N﻿ext we will add the Editor.js package along with some other Block tools. If you only add @editorjs/editorjs it will come with a default Text (a.k.a. paragraph) tool. The extra tools will give us a Header and Text tool with alignment options.
+`﻿``
+yarn add @editorjs/editorjs @editorjs/header editorjs-paragraph-with-alignment@3.x
+`﻿``
 
 
