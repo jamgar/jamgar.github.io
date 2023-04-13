@@ -161,7 +161,7 @@ Lastly we see the onChange function this is called everytime a value is update i
   }
 ```
 
-The disconnect function is just to do some memory clean up of the editor.
+The disconnect function is just to do some clean up of the editor.
 
 ```javascript
   disconnect() {
@@ -171,9 +171,59 @@ The disconnect function is just to do some memory clean up of the editor.
   }
 ```
 
+Next we can update the views. Open the Articles new.html.erb file and update the following. This will connect the `editor_controller.js`, and will provide the editordata value.
 
+```html
+<div data-controller="editor" data-editor-editordata-value={}>
+  <h1>New article</h1>
+  <%= render 'form', article: @article %>
 
+  <div>
+    <%= link_to "Back to articles", articles_path %>
+  </div>
+</div>
 
+```
+
+The edit.html.erb is very similar except we pass in the existing body value into the editordata.
+
+```html
+<div data-controller="editor" data-editor-editordata-value="<%= @article.body %>" data-editor-id-value="<%= @article.id %>">
+  <h1>Edit article</h1>
+  <%= render 'form', article: @article %>
+
+  <div>
+    <%= link_to "Back to articles", articles_path %>
+  </div>
+</div>
+```
+
+We need to update the form.html.erb partial. Here we are adding a div with an id with editorjs. Then adding the hidden field of body with the body data attribute. It will be updated when the editorjs changes.
+
+```html
+<%= form_with(model: article) do |form| %>
+  ...
+
+  <div id="editorjs">
+  </div>
+
+  <div>
+    <%= form.hidden_field :body, data: { editor_target: "body" } %>
+  </div>
+
+  ...
+<% end %>
+
+```
+
+Lastly we will update the show.html.erb. The key item here is the data attribute of readonly set to true. This will have the editor change to read only mode and so no updates can be made. There are some ruby gems that can be used for this, but now that the attribute has been added to the latest version of editorjs we can just use this to render the body.
+
+```html
+<div data-controller="editor" data-editor-readonly-value=true data-editor-editordata-value="<%= @article.body %>">
+  <%= render @article %>
+</div>
+...
+```
 
 
 
