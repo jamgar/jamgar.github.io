@@ -9,8 +9,8 @@ categories: Rails
 I﻿n this article I will step through adding [Editor.Js](https://editorjs.io/) to a Rails 7 app. Lets start with creating the Rails app.
 
 `﻿``ruby
-
 r﻿ails new editor-js-app --javascript=esbuild
-
 `﻿``
+
+
 
