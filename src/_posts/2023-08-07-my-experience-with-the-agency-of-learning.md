@@ -10,7 +10,6 @@ A couple of months ago I was honored to be accepted to join [Agency of Learning]
 
 It is not a top secret organization for students, or is it? Seriously, it is a program that was started by Dave Paola to help Early career developers and specifically Ruby on Rails(Rails) developers to get experience. It has taken on different iterations, but the goal remains the same. It is a totally volunteer basis program.
 
-
 ### Why Agency of Learning is needed?
 
 Over the last year or two there has been a lack in Jr level/Early career positions for Rails developers. For various reason companies are not investing in or "taking a chance" on Early career Rails developers. They are instead only seeking out Mid/Sr level Rails developers. As you can imagine in several years this will be a problem for companies that have invested in building their apps with Rails. This has lead to bootcamps moving away from teaching Rails and people in the community to tell people to learn something other then Rails, which is sad. 
@@ -18,7 +17,6 @@ Over the last year or two there has been a lack in Jr level/Early career positio
 Cost for companies will be that they will need to pay someone a large amount of money to maintain their app, pay someone a large amount of money to move over from another language to learn Rails, or pay someone a large amount of money to port over the app over to a different language that is still hiring Early career developers. You get the picture "Large amount of money". From a business sense, it doesn't makes cents. I digress. 
 
 Back to the Why. There has been some great people out there that have been the voice for Early career Rails developers, and they are shouting from the rooftop. I am super thankful for them. :hugs: Dave has taken the next step to help and invest in Early career developers. All of this so that Rails is still a thriving, and viable solution for years to come.
-
 
 ### How the Agency of Learning works?
 
@@ -29,7 +27,6 @@ The Sr level developers are mentors and leads for the various projects. One of t
 The Early career developers have some experience with HTML/CSS/JS and of course Rails. The experience consist of being self-taught and/or attending a bootcamp. Some have also worked on freelance projects. When we are accepted into the program we are encouraged to join one of the projects and get our hands dirty. There are standups, yes standups 😃. Each person talks about what did they work on yesterday? (or last working day). What do they plan on working on today? Do they have any blockers?
 
 One of the main ideas of Agency of Learning is to give us, Early career devs, an opportunity to get experience working in a team on production applications. In fact, these Open source projects we are working on are either now in production (being used in the wild) or will soon be.
-
 
 ### My experience
 
@@ -45,7 +42,7 @@ The Agency of Learning Discord is a great place to get and offer help, celebrate
 
 I would encourage you to get involved. To find out more get in touch with Dave at [Agency of learning](https://agencyoflearning.com/). Your act of involvement could change someone's life. Thank you for reading.
 
-*﻿*Podcast with Dave**
+**Podcast with Dave:**
 [﻿The Ruby on Rails Podcast](https://www.therubyonrailspodcast.com/442)
 [﻿Ruby for All](https://podcasts.apple.com/us/podcast/the-agency-of-learning-with-dave-paola/id1636775711?i=1000607693331)
 [﻿Build and Learn](https://podcasts.apple.com/us/podcast/build-and-learn/id1638387281?i=1000616703672)
