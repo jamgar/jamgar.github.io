@@ -23,7 +23,7 @@ layout: home
   {% assign posts = collections.posts.resources | slice: 0, 6 %} {% render "collection", collection: posts, metadata: site.metadata %}
 
   {% if collections.posts.resources.size > 6 %}
-  <div class="">
+  <div class="mt-4 mx-auto max-w-screen-lg">
     <a href="/posts/" class="btn bg-gray-700">
       <span>Previous Articles</span>
       <span class="text-gray-300" aria-hidden="true">&rarr;</span>
