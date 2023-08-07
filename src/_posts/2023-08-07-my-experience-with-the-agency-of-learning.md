@@ -42,7 +42,7 @@ The Agency of Learning Discord is a great place to get and offer help, celebrate
 
 I would encourage you to get involved. To find out more get in touch with Dave at [Agency of learning](https://agencyoflearning.com/). Your act of involvement could change someone's life. Thank you for reading.
 
-**Podcast with Dave:**
-[﻿The Ruby on Rails Podcast](https://www.therubyonrailspodcast.com/442)
-[﻿Ruby for All](https://podcasts.apple.com/us/podcast/the-agency-of-learning-with-dave-paola/id1636775711?i=1000607693331)
-[﻿Build and Learn](https://podcasts.apple.com/us/podcast/build-and-learn/id1638387281?i=1000616703672)
+*﻿*Podcast with Dave**
+[﻿The Ruby on Rails Podcast](https://www.therubyonrailspodcast.com/442) 
+[Ruby for All](https://podcasts.apple.com/us/podcast/the-agency-of-learning-with-dave-paola/id1636775711?i=1000607693331) 
+[Build and Learn](https://podcasts.apple.com/us/podcast/build-and-learn/id1638387281?i=1000616703672)
