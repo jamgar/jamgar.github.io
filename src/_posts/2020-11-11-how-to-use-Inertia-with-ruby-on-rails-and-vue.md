@@ -2,7 +2,7 @@
 layout: post
 title: "How to use Inertia with Ruby on Rails and Vue"
 subtitle:
-date: '2020-11-11T14:13:39.910Z'
+date: 2020-11-11T14:13:39.910Z
 categories: rails
 ---
 

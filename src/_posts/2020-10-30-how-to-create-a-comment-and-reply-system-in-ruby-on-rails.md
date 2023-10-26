@@ -2,7 +2,7 @@
 layout: post
 title: "How to create a comment and reply system in Ruby on Rails"
 subtitle:
-date: '2020-10-30T14:12:11.358Z'
+date: 2020-10-30T14:12:11.358Z
 categories: rails
 ---
 
