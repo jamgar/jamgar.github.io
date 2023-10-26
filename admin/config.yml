@@ -1,0 +1,46 @@
+backend:
+  name: git-gateway # required for using Github
+  branch: main # the default branch you want CMS changes merged to
+
+local_backend: true # Enable the CMS locally
+
+media_folder: src/images # location of where we want images uploaded via the CMS put
+
+publish_mode: editorial_workflow
+
+collections:
+  - name: blog # collection name
+    label: Blog # label in the CMS
+    folder: src/_posts/ # location of the files that make up the collection
+    extension: .md # extension of those files
+    format: frontmatter # format to use
+    create: true # allow creation of new items in this collection
+    slug: '{{year}}-{{month}}-{{day}}-{{title}}' # the slug to use when creating new items
+    editor:
+      preview: false # According to the documentation, this won't work with our setup, but I didn't try
+    fields: # Fields for the collection
+      - { label: Layout, name: layout, widget: hidden, default: post }
+      - { label: Title, name: title, widget: string }
+      - { label: Subtitle, name: subtitle, widget: string, required: false }
+      - { label: Publish Date, name: date, widget: datetime }
+      - { label: Categories, name: categories, widget: string }
+      - { label: Body, name: body, widget: markdown }
+  # - name: pages
+  #   label: Pages
+  #   editor:
+  #     preview: false
+  #   files:
+  #     - label: Index Page
+  #       name: index
+  #       file: src/index.md
+  #       fields:
+  #         - { label: Layout, name: title, widget: hidden, default: home }
+  #         - { label: Body, name: body, widget: markdown }
+  #     - label: About Page
+  #       name: about
+  #       file: src/about.md
+  #       fields:
+  #         - { label: Title, name: title, widget: hidden, default: About }
+  #         - { label: Layout, name: layout, widget: hidden, default: page }
+  #         - { label: Permalink, name: permalink, widget: string, default: '/about/' }
+  #         - { label: Body, name: body, widget: markdown }

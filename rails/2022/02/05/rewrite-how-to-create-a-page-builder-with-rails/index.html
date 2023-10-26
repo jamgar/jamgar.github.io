@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="James Garcia" />
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Rewrite: How to create a Page builder with Rails | James Garcia</title>
+
+<meta name="description" content="James Garcia - Web developer" />
+
+<link rel="stylesheet" href="/_bridgetown/static/css/main.c4aa4b876deed32762e8.css" />
+<script src="/_bridgetown/static/js/main.3e63050e6041267a18e4.js" defer></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  </head>
+  <body class="post ">
+    <div class="navbar bg-amber-300 font-medium">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+        <li>
+          <a class="navbar-item" href="/">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/about">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/posts">
+            Posts
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/projects">
+            Projects
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/about">
+          About
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/posts">
+          Posts
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/projects">
+          Projects
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end"></div>
+</div>
+
+
+    <main>
+      <article class="mt-20 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  Rewrite: How to create a Page builder with Rails
+  </h1>
+
+  <section class="md:px-0 px-4">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-900 ">
+          James Garcia
+        </div>
+      <div class="text-base font-light text-gray-500">
+        2022-02-05
+      </div>
+
+    </div>
+    <div class="">
+      <p>This is a rewrite of the How to create a Page builder with Rails that I wrote last month. I left the old one for history, but I wanted to make the builder look nicer and refactor the code. If you did not see the other one don’t worry I will take this from the beginning.</p>
+
+<p>I said in the other article my implementation will not be full featured, but it can be a starting point. Also, I am sure there are better ways to go about this.</p>
+
+<p>I have been wanting to create this for a while, but did not know how to accomplish it, and so as all good developers do I “googled” 😃 I was not able to find much, but was able to piece together the idea. Here is what I came up with.</p>
+
+<p>The completed project is <a href="https://github.com/jamgar/pagebuilderapp">here</a>.</p>
+
+<h3 id="lets-start"><strong>Let’s start</strong></h3>
+<p>I am assuming that you are familiar with Rails and have your workstation all setup to create a Rails app.</p>
+
+<p>In the terminal enter:
+<code class="highlighter-rouge">mkdir pagebuilderapp</code>
+<code class="highlighter-rouge">cd pagebuilderapp</code>
+<code class="highlighter-rouge">rails new . --database=postgresql</code>
+What we did here is create a new directory called “pagebuilderapp” and then changed into the new directory. Next we created a new Rails app, but we will be using Postgres as our database instead of sqlite later. The reason is that we will be using JSON to store information.</p>
+
+<p>Test that the app was created successfully. In the terminal run:
+<code class="highlighter-rouge">rails db:create</code>
+Since we are using Postgres we need to create the database first, or else you will get an error.
+Next start the rails app.
+<code class="highlighter-rouge">rails s</code>
+Open the browser and navigate to http://localhost:3000/ and you should see the Yay! page.</p>
+
+<p><img src="/images/rails yay page.png" alt="rails yay page" /></p>
+
+<h3 id="create-resources"><strong>Create resources</strong></h3>
+<p>First we will scaffold Pages, run the following command:
+<code class="highlighter-rouge">rails generate scaffold page name:string</code>
+Page is where all the page elements (i.e. Hero and Text sections) will be added to.</p>
+
+<p>Next we will scaffold Elements, run the following command:
+<code class="highlighter-rouge">rails generate scaffold element name:string element_type:string</code>
+Element is mainly used to reference the partials (blueprint) that the page element will use. While I didn’t do it, you could use the Element to store default properties and their values. This is something I may implement later if I use this in a “real world” case.</p>
+
+<p>Next we will scaffold PageElements, run the following command:
+<code class="highlighter-rouge">rails generate scaffold page_element page:belongs_to element:belongs_to properties:jsonb</code>
+PageElement will store the properties of the element that will show up on the Page. This is the last resource, but before run the db:migrate we need to make change to the PageElement migration file. Open the db/migrate/*<time_date>*_create_page_elements.rb file.</time_date></p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CreatePageElements</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span><span class="p">[</span><span class="mf">6.1</span><span class="p">]</span>
+  <span class="k">def</span> <span class="nf">change</span>
+    <span class="n">create_table</span> <span class="ss">:page_elements</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+      <span class="o">...</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">jsonb</span> <span class="ss">:properties</span><span class="p">,</span> <span class="ss">null: </span><span class="kp">false</span><span class="p">,</span> <span class="ss">default: </span><span class="s1">'{}'</span>
+      <span class="o">...</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Add <code class="highlighter-rouge">, null: false, default: '{}'</code> to the t.jsonb line. This will make sure it has a value.</p>
+
+<p>Lastly, we will scaffold ElementProperties, run the following command:
+<code class="highlighter-rouge">rails generate scaffold element_property element:belongs_to name:string input_type:string value:string</code> The ElementProperties will be used to store default values and properties for the Elements. So when we click to add a Hero to the page it will create the form based on the ElementProperties. This will be made clear as we build out the app.</p>
+
+<p>We are done with the migration, and now create the tables by running:
+<code class="highlighter-rouge">rails db:migrate</code></p>
+
+<p>We need to update the Page and Element models to complete the relationship of the PageElements and ElementProperties. Open models/page.rb and adding the following:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">has_many</span> <span class="ss">:page_elements</span><span class="p">,</span> <span class="ss">dependent: :destroy</span>
+</code></pre></div></div>
+<p>Open models/element.rb and adding the following:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">has_many</span> <span class="ss">:element_properties</span><span class="p">,</span> <span class="ss">inverse_of: :element</span>
+<span class="n">has_many</span> <span class="ss">:page_elements</span><span class="p">,</span> <span class="ss">dependent: :nullify</span>
+
+<span class="n">accepts_nested_attributes_for</span> <span class="ss">:element_properties</span><span class="p">,</span> <span class="ss">allow_destroy: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">reject_if: :all_blank</span>
+</code></pre></div></div>
+
+<p>As you will see above I add a line <code class="highlighter-rouge">accepts_nested_attributes_for</code> for the ElementProperties. That is because an Element can have more than one property. When we are creating the Element we can add as many properties as we like. If you are asking why we did not use a JSONB to store this information? That is because we ‘know’ what input we will store. Where as PageElements properties can vary on the Element.</p>
+
+<p>Now we need to update the PageElement model. Serialize will helps to work with the Page Elements properties which will be of data type JSON.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">...</span>
+ <span class="n">serialize</span> <span class="ss">:properties</span>
+</code></pre></div></div>
+
+<h3 id="static-page"><strong>Static Page</strong></h3>
+<p>Before going any further we will set up a home page and navigations. This is optional, but it helps when we are trying to move around the app in the browser. This time run:
+<code class="highlighter-rouge">rails generate controller StaticPages home</code>
+This will create the controller, view, and add the route for static pages and a home action.</p>
+
+<p>We need to update the routes file to add a root path. In the config/routes.rb make the following change.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">get</span> <span class="s1">'static_pages/home'</span> <span class="c1"># &lt;- Delete this line</span>
+<span class="n">root</span> <span class="s1">'static_pages#home'</span> <span class="c1"># &lt;- Add this link</span>
+</code></pre></div></div>
+
+<p>Now if you start the rails app it will go to the default created home.html.erb page.</p>
+
+<p>So it will look good lets add Bulma, which is a nice CSS framework. You can learn more by going to <a href="https://bulma.io">bulma.io</a>. Open the views/layouts/application.html.erb and inside the head tags add the following.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;head&gt;
+...
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"&gt;
+&lt;/head&gt;
+</code></pre></div></div>
+<p>Since you are already in the application.html.erb page add the navigation partial above the <code class="highlighter-rouge">yield</code>.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;body&gt;
+  &lt;%= render 'shared/navigation' %&gt; # &lt;- Add this line
+  &lt;%= yield %&gt;
+&lt;/body&gt;
+</code></pre></div></div>
+
+<p>Next will create the navigation partial. Under the <code class="highlighter-rouge">views</code> add a folder called <code class="highlighter-rouge">shared</code> and then create a partial call <code class="highlighter-rouge">_navigation.html.erb</code>.</p>
+
+<p>Open the views/shared/_navigation.html.erb file and add the following:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;nav class="navbar is-primary" role="navigation" aria-label="main navigation"&gt;
+  &lt;div class="container navbar-menu"&gt;
+    &lt;div class="navbar-start"&gt;
+      &lt;%= link_to 'Home', root_path, class: 'navbar-item' %&gt;
+      &lt;%= link_to 'Pages', pages_path, class: 'navbar-item' %&gt;
+      &lt;%= link_to 'Elements', elements_path, class: 'navbar-item' %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+</code></pre></div></div>
+<p>Now the navigation is on every page.</p>
+
+<p><img src="/images/home_page_with_style_nav.png" alt="home_page_with_style_nav" /></p>
+
+<h3 id="elements"><strong>Elements</strong></h3>
+<p>To create an Element we need to address a few items to get the ElementProperties nested attributes. We need to update the form so that we can add the propertiesusing the nested form approach. I pretty much just followed this post by Steve Polito <a href="https://stevepolito.design/blog/create-a-nested-form-in-rails-from-scratch/">Create a nested form in rails from scratch</a> on getting this part set up. He has some great post so I would recommend checking them out.</p>
+
+<p>Update the ElementsController permitted parameters to include the element_properties_attributes.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">...</span>
+<span class="k">def</span> <span class="nf">element_params</span>
+  <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:element</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:element_type</span><span class="p">,</span> <span class="ss">element_properties_attributes: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:input_type</span><span class="p">,</span> <span class="ss">:value</span><span class="p">,</span> <span class="ss">:_destroy</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Create an partial for the element_properties <code class="highlighter-rouge">views\elements\_element_property_fiels.html.erb</code></p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"nested-fields"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= f.hidden_field :_destroy %&gt;
+  &lt;div class=</span><span class="s2">"field"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= f.label :name, class: 'label' %&gt;
+    &lt;div class=</span><span class="s2">"control"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="sx">%= f.text_field :name, class: 'input' %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=</span><span class="s2">"field"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= f.label :input_type, class: 'label' %&gt;
+    &lt;div class=</span><span class="s2">"control"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= f.text_field :input_type, class: 'input' %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=</span><span class="s2">"field"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= f.label :value, class: 'label' %&gt;
+    &lt;div class=</span><span class="s2">"control"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= f.text_field :value, class: 'input' %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=</span><span class="s2">"field"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"control"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= link_to "Remove", '#', class: "remove_fields" %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</span></code></pre></div></div>
+
+<p>Update the Elements form partial <code class="highlighter-rouge">views\elements\_form.html.erb</code> to include the new element_property_fields partial.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="n">fieldset</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">h4</span> <span class="k">class</span><span class="o">=</span><span class="s2">"title is-4"</span><span class="o">&gt;</span><span class="no">Properties</span><span class="ss">:&lt;</span><span class="o">/</span><span class="n">h4</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= form.fields_for :element_properties  do |property| %&gt;
+    &lt;%=</span> <span class="n">render</span> <span class="s2">"element_property_fields"</span><span class="p">,</span> <span class="ss">f: </span><span class="n">property</span> <span class="sx">%&gt;
+  &lt;% end %&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= link_to_add_fields "Add Property", form, :element_properties %&gt;
+&lt;/fieldset&gt;
+
+&lt;hr /&gt;
+</span></code></pre></div></div>
+
+<p>In the article Steve wrote he create a Helper and two JavaScript files, and I just created the same files and copy and pasted the code. Please see steps 4 and 5 of that article. I just want to see that he gets credit for this work.</p>
+
+<p>With that in place if you go to create a new Element a form should look like this. If you click the ‘Add Property’ the a nested form will appear under the Propteries heading. Now if you need to add another property all you have to do is click the Add Property button.</p>
+
+<p><img src="/images/new_element_properties_nested_form.png" alt="new_element_properties_nested_form" /></p>
+
+<p>Now we can start creating our elements. Let us create a Hero. Below are the values you will enter. For Properties for each row you will need to click Add Property.</p>
+
+<p><strong>Name</strong>: Hero</p>
+
+<p><strong>Element Type</strong>: hero</p>
+
+<p><strong>Properties</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Input Type</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>hero_h1</td>
+      <td>text</td>
+      <td>Hero Title</td>
+    </tr>
+    <tr>
+      <td>hero_subtitle</td>
+      <td>text</td>
+      <td>Hero subtitle</td>
+    </tr>
+    <tr>
+      <td>background_color</td>
+      <td>color</td>
+      <td>#ffffff</td>
+    </tr>
+    <tr>
+      <td>text_color</td>
+      <td>color</td>
+      <td>#000000</td>
+    </tr>
+    <tr>
+      <td>padding_top</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>padding_bottom</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>padding_left</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>padding_right</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>cta_url</td>
+      <td>text</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>We will create a second element and this time we will create a Text element.</p>
+
+<p><strong>Name</strong>: Text</p>
+
+<p><strong>Element Type</strong>: text</p>
+
+<p><strong>Properties</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Input Type</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>text_color</td>
+      <td>color</td>
+      <td>#000000</td>
+    </tr>
+    <tr>
+      <td>text_align</td>
+      <td>text</td>
+      <td>left</td>
+    </tr>
+    <tr>
+      <td>text_value</td>
+      <td>text</td>
+      <td>Text goes here…</td>
+    </tr>
+    <tr>
+      <td>padding_top</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>padding_bottom</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>padding_left</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>padding_right</td>
+      <td>text</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="pages"><strong>Pages</strong></h3>
+<p>Create a new page that we use for the rest of this article.</p>
+
+<p><img src="/images/new_page_form_2.png" alt="new_page_form_2" /></p>
+
+<p>This will take you to the newly create page.</p>
+
+<h3 id="pageelements"><strong>PageElements</strong></h3>
+<p>Now that we have that in place it is time to start adding elements to our page. So the idea is to have a list of Elements that will show up on the Pages edit page. What you will see in some page builder is a fly out blade or a column with buttons or tiles that you can drag and drop onto the page. Ours will not be that sophisticated. We will just list the Element as buttons in a side column and then when you will click on the button it will append the element to the page.</p>
+
+<p>To start out lets make a change to the routes.rb page. I want the PageElements to be a nested resource of Page. Open config/routes.rb and move <code class="highlighter-rouge">resources :page_elements</code> inside a <code class="highlighter-rouge">resources :pages</code> block.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">routes</span><span class="p">.</span><span class="nf">draw</span> <span class="k">do</span>
+  <span class="o">...</span>
+  <span class="n">resources</span> <span class="ss">:pages</span> <span class="k">do</span>
+    <span class="n">resources</span> <span class="ss">:page_elements</span>
+  <span class="k">end</span>
+  <span class="o">...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Next we need to be able to list the available Elements on the Pages edit page file. Open the controllers/pages_controller.rb and update the <code class="highlighter-rouge">edit</code> to get all available Elements.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="nf">edit</span>
+    <span class="vi">@elements</span> <span class="o">=</span> <span class="no">Element</span><span class="p">.</span><span class="nf">all</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>Next we will open the views/pages/edit.html.erb. Below the edit form add the following:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"columns"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"column is-three-quarters"</span><span class="o">&gt;</span>
+
+    <span class="o">&lt;</span><span class="n">h2</span> <span class="k">class</span><span class="o">=</span><span class="s2">"title is-2"</span><span class="o">&gt;</span><span class="no">Editing</span> <span class="no">Page</span><span class="o">&lt;</span><span class="sr">/h2&gt;
+
+    &lt;div class="columns is-half"&gt;
+      &lt;%= render 'form', page: @page %&gt;
+    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+
+    <span class="o">&lt;</span><span class="sx">%= link_to 'Show', @page %&gt; |
+    &lt;%=</span> <span class="n">link_to</span> <span class="s1">'Back'</span><span class="p">,</span> <span class="n">pages_path</span> <span class="sx">%&gt;
+    &lt;hr /&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"page-element-content"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">% @page.page_elements.each </span><span class="k">do</span> <span class="o">|</span><span class="n">el</span><span class="o">|</span> <span class="sx">%&gt;
+        &lt;%= render "page_elements/elements/#{el.element.element_type}_edit", page_element: el %&gt;</span>
+      <span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+    <span class="o">&lt;</span><span class="sr">/div&gt;
+  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"column"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">h3</span> <span class="k">class</span><span class="o">=</span><span class="s2">"title is-4 mb-2"</span><span class="o">&gt;</span><span class="no">Elements</span><span class="o">&lt;</span><span class="sr">/h3&gt;
+
+    &lt;% @elements.each do |el| %&gt;
+        &lt;%= link_to el.name, new_page_page_element_path(@page, element_type: el.element_type), remote: true, role: "button", class: "button is-fullwidth is-info mb-2" %&gt;
+    &lt;% end %&gt;
+    &lt;hr /</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"element-properties-form"</span><span class="o">&gt;&lt;</span><span class="sr">/div&gt;
+  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sr">/div&gt;
+</span></code></pre></div></div>
+<p>There is alot being added so I will try to go through it. We are creating a two column layout with the list of Elements buttons to the right and the rest of the page will show the represnetations of the Elements. The list of Elments are buttons and they have an attribute of <code class="highlighter-rouge">remote: true</code> which will make a Ajax request to the controller which will repond with a JavaScript file and no page refresh. The JavaScript file will render two partials. One for the properties form and the other for element partial. If you try to click the Edit link for the newly created Page you will get an error because we need to make some changes to the PageElements controller.</p>
+
+<p>Open controllers/page_elements_controller.rb. Update the new action and add some before_actions by adding the following lines:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PageElementsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="n">before_action</span> <span class="ss">:set_page</span>
+  <span class="n">before_action</span> <span class="ss">:set_element</span><span class="p">,</span> <span class="ss">only: </span><span class="sx">%i[ new create edit update ]</span>
+  <span class="o">...</span>
+</code></pre></div></div>
+
+<p>Update the new method for the @page_element. Add the set_default_value to call this method</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="nf">new</span>
+    <span class="vi">@page_element</span> <span class="o">=</span> <span class="vi">@page</span><span class="p">.</span><span class="nf">page_elements</span><span class="p">.</span><span class="nf">new</span>
+    <span class="n">set_default_value</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Update the create method to add @element ID. Update the redirect_to for the <strong>create, update, destroy</strong> methods. This is so the on redirect it will go to the edit page Page.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="nf">create</span>
+    <span class="vi">@page_element</span> <span class="o">=</span> <span class="vi">@page</span><span class="p">.</span><span class="nf">page_elements</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">page_element_params</span><span class="p">)</span>
+    <span class="vi">@page_element</span><span class="p">.</span><span class="nf">element_id</span> <span class="o">=</span> <span class="vi">@element</span><span class="p">.</span><span class="nf">id</span>
+
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="k">if</span> <span class="vi">@page_element</span><span class="p">.</span><span class="nf">save</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">edit_page_path</span><span class="p">(</span><span class="vi">@page</span><span class="p">),</span> <span class="ss">notice: </span><span class="s2">"Page element was successfully created."</span> <span class="p">}</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">status: :created</span><span class="p">,</span> <span class="ss">location: </span><span class="vi">@page_element</span> <span class="p">}</span>
+      <span class="k">else</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">edit_page_path</span><span class="p">(</span><span class="vi">@page</span><span class="p">),</span> <span class="ss">status: :unprocessable_entity</span> <span class="p">}</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">json: </span><span class="vi">@page_element</span><span class="p">.</span><span class="nf">errors</span><span class="p">,</span> <span class="ss">status: :unprocessable_entity</span> <span class="p">}</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>We are adding <code class="highlighter-rouge">set_page</code>, <code class="highlighter-rouge">set_element</code>, <code class="highlighter-rouge">set_properties</code>, and <code class="highlighter-rouge">set_default_values</code>. We are updating the <code class="highlighter-rouge">page_element_params</code> to use <code class="highlighter-rouge">set_properites</code> for the properties attributes. The jsonb <code class="highlighter-rouge">properties</code> works similar to nested attributes where you will need list the permitted param. Since the properties will vary from element to element this gives us a way to dynamically add the permitted nested parameters. The <code class="highlighter-rouge">set_dafault_values</code> is used in the new method, and as the name suggest it will just set the default value for the properties.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">...</span>
+  <span class="kp">private</span>
+    <span class="c1"># Use callbacks to share common setup or constraints between actions.</span>
+    <span class="k">def</span> <span class="nf">set_page</span>
+      <span class="vi">@page</span> <span class="o">=</span> <span class="no">Page</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page_id</span><span class="p">])</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">set_element</span>
+      <span class="vi">@element</span> <span class="o">=</span> <span class="no">Element</span><span class="p">.</span><span class="nf">find_by</span><span class="p">(</span><span class="ss">element_type: </span><span class="n">params</span><span class="p">[</span><span class="ss">:element_type</span><span class="p">])</span>
+    <span class="k">end</span>
+  <span class="o">...</span>
+      <span class="c1"># Only allow a list of trusted parameters through.</span>
+    <span class="k">def</span> <span class="nf">page_element_params</span>
+      <span class="c1"># params.require(:page_element).permit(:element_id, properties: {})</span>
+      <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:page_element</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:element_id</span><span class="p">,</span> <span class="ss">properties: </span><span class="n">set_properties</span><span class="p">)</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">set_properties</span>
+      <span class="vi">@element</span><span class="p">.</span><span class="nf">element_properties</span><span class="p">.</span><span class="nf">map</span> <span class="k">do</span> <span class="o">|</span><span class="n">property</span><span class="o">|</span>
+        <span class="n">property</span><span class="p">[</span><span class="ss">:name</span><span class="p">].</span><span class="nf">to_sym</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">set_default_values</span>
+      <span class="vi">@page_element</span><span class="p">.</span><span class="nf">properties</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="vi">@element</span><span class="p">.</span><span class="nf">element_properties</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">property</span><span class="o">|</span>
+        <span class="vi">@page_element</span><span class="p">.</span><span class="nf">properties</span><span class="p">[</span><span class="n">property</span><span class="p">[</span><span class="ss">:name</span><span class="p">]]</span> <span class="o">=</span> <span class="n">property</span><span class="p">[</span><span class="ss">:value</span><span class="p">]</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+</code></pre></div></div>
+<p>Now that is in place we can work on having a “Hero” form appear on the page. First add a folder under the views/page_elements/ called <code class="highlighter-rouge">elements</code>. This will hold the partials for the elements. Under the new elements folder create a partial called <code class="highlighter-rouge">_hero_form.html.erb</code>, and add the following:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;%= form_with(model: [page, page_element]) do |form| %&gt;
+  &lt;% if page_element.errors.any? %&gt;
+    &lt;div id="error_explanation"&gt;
+      &lt;h2&gt;&lt;%= pluralize(page_element.errors.count, "error") %&gt; prohibited this page_element from being saved:&lt;/h2&gt;
+
+      &lt;ul&gt;
+        &lt;% page_element.errors.each do |error| %&gt;
+          &lt;li&gt;&lt;%= error.full_message %&gt;&lt;/li&gt;
+        &lt;% end %&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+  &lt;%= hidden_field_tag :element_type, @element.element_type %&gt;
+
+  &lt;%= form.fields_for :properties, OpenStruct.new(form.object.properties) do |property| %&gt;
+    &lt;% @element.element_properties.each do |ep| %&gt;
+      &lt;div class="field"&gt;
+        &lt;%= label_tag ep.name, nil, class: 'label' %&gt;
+        &lt;div class="control"&gt;
+        &lt;% if ep.input_type == "color" %&gt;
+          &lt;%= property.color_field ep.name, class: 'input' %&gt;
+        &lt;% else %&gt;
+          &lt;%= property.text_field ep.name, class: 'input' %&gt;
+        &lt;% end %&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;% end %&gt;
+  &lt;% end %&gt;
+
+  &lt;div class="field"&gt;
+    &lt;div class="control"&gt;
+      &lt;%= form.submit 'Save', class: 'button is-link' %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;% end %&gt;
+</code></pre></div></div>
+
+<p>Since we are nesting the page_element the first line will make it have the correct action path the <code class="highlighter-rouge">form_with(model: [page, page_element])</code> will create the path /pages/:id/page_elements. There is a hidden field for the element_type which is used to set the element in the controller. Next is the fields_for which will allow us to take the properties loop and through then and create the input fields.What is the deal with the OpenStruct. Since the properties key/value structure to be converted into a data structure the form can use to fill the value for each input. Below I am just showing the pieces broken down.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; form.object
+# Returns a PageElement object
+=&gt; Form: #&lt;PageElement:0x0000...&gt;
+
+&gt; form.object.properties
+# Returns the properties in a key/value format
+=&gt; Form: {"hero_h1"=&gt;"Hero Title", "hero_subtitle"=&gt;"Hero subtitle", "background_color"=&gt;"#ffffff", "text_color"=&gt;"#000000", "padding_top"=&gt;"0", "padding_bottom"=&gt;"0", "padding_left"=&gt;"0", "padding_right"=&gt;"0", "cta_url"=&gt;""}
+
+&gt; OpenStruct.new(form.object.properties)
+# Returns a data structure that the form can use.
+=&gt; Form: #&lt;OpenStruct hero_h1="Hero Title", hero_subtitle="Hero subtitle", background_color="#ffffff", text_color="#000000", padding_top="0", padding_bottom="0", padding_left="0", padding_right="0", cta_url=""&gt;
+
+</code></pre></div></div>
+
+<p>Inside the fields_for I am looping through the element_propeties so that I can set the fields name and set the correct input type.</p>
+
+<p>Next create a new.js.erb file under views/page_elements/. Since we are making an Ajax request when we click the “Hero” link the controller receive the request as JS and respond with a .js.erb file. Open the views/page_elements/new.js.erb file and add the following:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">document</span><span class="p">.</span><span class="nf">querySelector</span><span class="p">(</span><span class="s2">"#page-element-content"</span><span class="p">).</span><span class="nf">insertAdjacentHTML</span><span class="p">(</span><span class="s2">"beforeend"</span><span class="p">,</span> <span class="s2">"&lt;%= j render "</span><span class="n">page_elements</span><span class="o">/</span><span class="n">elements</span><span class="o">/</span><span class="c1">#{@element.element_type}_edit", page_element: @page_element %&gt;")</span>
+
+<span class="n">document</span><span class="p">.</span><span class="nf">querySelector</span><span class="p">(</span><span class="s2">"#element-properties-form"</span><span class="p">).</span><span class="nf">innerHTML</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"&lt;%= j render "</span><span class="n">page_elements</span><span class="o">/</span><span class="n">elements</span><span class="o">/</span><span class="c1">#{@element.element_type}_form", page: @page, page_element: @page_element %&gt;")</span>
+</code></pre></div></div>
+<p>We are using JavaScript to locate targets in the Page edit.html.erb page to insert/append partials. The first being the representation of the Element and the send is for the Page Elements form so we can edit the properties. We already added these targets when updated the Page edit form.</p>
+
+<p>Next create a partial <code class="highlighter-rouge">_hero_edit.html</code> file under views/page_elements/elements/. Open the partial and add the following:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;div class="block my-2 is-relative"&gt;
+  &lt;div id=&lt;%= "hero-#{dom_id(page_element)}" %&gt; style="&lt;%= hero_styles(page_element.properties) %&gt;"&gt;
+    &lt;hgroup&gt;
+      &lt;h1 class="is-size-1"&gt;&lt;%= page_element.properties["hero_h1"].present? ? page_element.properties["hero_h1"] : "Hero Title" %&gt;&lt;/h1&gt;
+      &lt;h3 class="is-size-3"&gt;&lt;%= page_element.properties["hero_subtitle"].present? ? page_element.properties["hero_subtitle"] : "Hero Subtitle" %&gt;&lt;/h3&gt;
+    &lt;/hgroup&gt;
+    &lt;% if page_element.properties["cta_url"].present? %&gt;
+      &lt;div style="text-align: center;"&gt;
+        &lt;a href="#" class="button is-outlined"&gt;Go to&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;% end %&gt;
+  &lt;/div&gt;
+  &lt;% if page_element.persisted? %&gt;
+    &lt;div class="action-buttons has-background-grey-light p-1"&gt;
+      &lt;%= link_to 'Edit', edit_page_page_element_path(page_element.page, page_element, element_type: 'hero'), remote: true, class: 'button is-light is-small' %&gt;
+      &lt;%= link_to 'Delete', page_page_element_path(page_element.page, page_element), method: :delete, data: { confirm: "Are you sure?" }, class: 'button is-light is-small' %&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+<p>The above partial will be the element that will show on the edit Page. We will create a different partial that will be used on the Page show page. One thing to note is on the first line you will see <code class="highlighter-rouge">style="&lt;%= hero_styles(page_element.properties) %&gt;"</code>. I had to create helper method called “hero_styles” to take in the properties and map them to the proper CSS names and add the values. This helper returns a string of the styles and values. Example: <code class="highlighter-rouge">"background-color:#9effc3;color:#000000;padding-top:px;padding-bottom:px;padding-left:px;padding-right:px;"</code> When you create a page element it will show up with the styles you have submitted. Also the action buttons (Edit, Delete) will not appear until the page elment has been save or persisted.</p>
+
+<p>We will need to create this helper method. Under the app/helpers folder create hero_helper.rb file, and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">HeroHelper</span>
+  <span class="k">def</span> <span class="nf">hero_styles</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+    <span class="n">styles</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">styles</span> <span class="o">&lt;&lt;</span> <span class="s2">"background-color:"</span> <span class="o">&lt;&lt;</span> <span class="n">properties</span><span class="p">[</span><span class="s2">"background_color"</span><span class="p">].</span><span class="nf">to_s</span> <span class="o">&lt;&lt;</span> <span class="s2">";"</span>
+    <span class="n">styles</span> <span class="o">&lt;&lt;</span> <span class="s2">"color:"</span> <span class="o">&lt;&lt;</span> <span class="n">properties</span><span class="p">[</span><span class="s2">"text_color"</span><span class="p">].</span><span class="nf">to_s</span> <span class="o">&lt;&lt;</span> <span class="s2">";"</span>
+    <span class="n">styles</span> <span class="o">&lt;&lt;</span> <span class="s2">"padding-top:"</span> <span class="o">&lt;&lt;</span> <span class="n">properties</span><span class="p">[</span><span class="s2">"padding_top"</span><span class="p">].</span><span class="nf">to_s</span> <span class="o">&lt;&lt;</span> <span class="s2">"px;"</span>
+    <span class="n">styles</span> <span class="o">&lt;&lt;</span> <span class="s2">"padding-bottom:"</span> <span class="o">&lt;&lt;</span> <span class="n">properties</span><span class="p">[</span><span class="s2">"padding_bottom"</span><span class="p">].</span><span class="nf">to_s</span> <span class="o">&lt;&lt;</span> <span class="s2">"px;"</span>
+    <span class="n">styles</span> <span class="o">&lt;&lt;</span> <span class="s2">"padding-left:"</span> <span class="o">&lt;&lt;</span> <span class="n">properties</span><span class="p">[</span><span class="s2">"padding_left"</span><span class="p">].</span><span class="nf">to_s</span> <span class="o">&lt;&lt;</span> <span class="s2">"px;"</span>
+    <span class="n">styles</span> <span class="o">&lt;&lt;</span> <span class="s2">"padding-right:"</span> <span class="o">&lt;&lt;</span> <span class="n">properties</span><span class="p">[</span><span class="s2">"padding_right"</span><span class="p">].</span><span class="nf">to_s</span> <span class="o">&lt;&lt;</span> <span class="s2">"px;"</span>
+    <span class="n">styles</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>You will need to create such method for any available Elements that you create or find a way to DRY this up. For now we can just create a separate helper for each Element.</p>
+
+<p>Now if you go to the Page you created and then click edit you will see the Hero button to the right. When you click the “Hero” button the hero form with the hero element will appear with the default values and styles. To edit the page_element change the values in the form below the Hero button and then click the save button below the page_element form.</p>
+
+<p><img src="/images/page_elements_form_2.png" alt="page_elements_form_2" /></p>
+
+<p>We will want to show the elements on the Page show page. Open the views/pages/show.html.erb. Add the follwing to the page name.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;h1 class="title is-2"&gt;
+  &lt;%= @page.name %&gt;
+&lt;/h1&gt;
+&lt;hr /&gt;
+&lt;div id="page-element-content"&gt;
+  &lt;% @page.page_elements.each do |el| %&gt;
+    &lt;%= render "page_elements/elements/#{el.element.element_type}", page_element: el %&gt;
+  &lt;% end %&gt;
+
+&lt;hr /&gt;
+</code></pre></div></div>
+<p>We are rendering a partial for each page element created. We will need to create this partial. Open views/page_elements/elements/ and add a <code class="highlighter-rouge">_hero.html.erb</code> file. Open the <code class="highlighter-rouge">_hero.html.erb</code> file and add the following:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;div id=&lt;%= "hero-#{dom_id(page_element)}" %&gt; style="&lt;%= hero_styles(page_element.properties) %&gt;"&gt;
+  &lt;hgroup&gt;
+    &lt;h1 class="is-size-1"&gt;&lt;%= page_element.properties["hero_h1"].present? ? page_element.properties["hero_h1"] : "Hero Title" %&gt;&lt;/h1&gt;
+    &lt;h3 class="is-size-3"&gt;&lt;%= page_element.properties["hero_subtitle"].present? ? page_element.properties["hero_subtitle"] : "Hero Subtitle" %&gt;&lt;/h3&gt;
+  &lt;/hgroup&gt;
+  &lt;% if page_element.properties["cta_url"].present? %&gt;
+    &lt;div style="text-align: center;"&gt;
+      &lt;a href="&lt;%= page_element.properties["cta_url"] %&gt;" class="button is-outlined"&gt;Go to&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+<p>Now if you create a new Page element and go the show page of the Page then you will see the styled element.</p>
+
+<p><img src="/images/show_page_2.png" alt="show_page_2" /></p>
+
+<p>To close the circle you can update the Page element by going the edit page of the Page and then click the edit button at the top right of the page element. This will open the edit form.</p>
+
+<p><img src="/images/edit_page_element_2.png" alt="edit_page_element_2" /></p>
+
+<p>To get this the page elements edit form to appear we need to add a edit.js.erb to the /views/page_elements/. Add the following to the file:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>document.querySelector("#element-properties-form").innerHTML = ("&lt;%= j render "page_elements/elements/#{@element.element_type}_form", page: @page, page_element: @page_element %&gt;")
+</code></pre></div></div>
+<p>This is similar to the new.js.erb as it will target the id <code class="highlighter-rouge">element-properties-form</code> and insert the form.</p>
+
+<p>For the Text Element you will basically create the three partials, <code class="highlighter-rouge">_text_edit.html.erb</code>, <code class="highlighter-rouge">_text_form.html.erb</code>, <code class="highlighter-rouge">_text.html.erb</code>, and the text_helper.rb file.</p>
+
+<p>views/page_elements/elements/_text_edit.html.erb</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;div class="block my-2 is-relative"&gt;
+  &lt;div id=&lt;%= "text-#{dom_id(page_element)}" %&gt; style="&lt;%= text_styles(page_element.properties) %&gt;"&gt;
+    &lt;p&gt;&lt;%= page_element.properties["text_value"].present? ? page_element.properties["text_value"] : "Text goes here" %&gt;&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;% if page_element.persisted? %&gt;
+    &lt;div class="action-buttons has-background-grey-light p-1"&gt;
+      &lt;%= link_to 'Edit', edit_page_page_element_path(page_element.page, page_element, element_type: 'text'), remote: true, class: 'button is-light is-small' %&gt;
+      &lt;%= link_to 'Delete', page_page_element_path(page_element.page, page_element), method: :delete, data: { confirm: "Are you sure?" }, class: 'button is-light is-small' %&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+
+<p>views/page_elements/elements/_text_form.html.erb</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;%= form_with(model: [page, page_element]) do |form| %&gt;
+  &lt;% if page_element.errors.any? %&gt;
+    &lt;div id="error_explanation"&gt;
+      &lt;h2&gt;&lt;%= pluralize(page_element.errors.count, "error") %&gt; prohibited this page_element from being saved:&lt;/h2&gt;
+
+      &lt;ul&gt;
+        &lt;% page_element.errors.each do |error| %&gt;
+          &lt;li&gt;&lt;%= error.full_message %&gt;&lt;/li&gt;
+        &lt;% end %&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+  &lt;%= hidden_field_tag :element_type, @element.element_type %&gt;
+
+  &lt;%= form.fields_for :properties, OpenStruct.new(form.object.properties) do |property| %&gt;
+    &lt;% @element.element_properties.each do |ep| %&gt;
+      &lt;div class="field"&gt;
+        &lt;%= label_tag ep.name, nil, class: 'label' %&gt;
+        &lt;div class="control"&gt;
+        &lt;% if ep.input_type == "color" %&gt;
+          &lt;%= property.color_field ep.name, class: 'input' %&gt;
+        &lt;% elsif ep.input_type == "text_area" %&gt;
+          &lt;%= property.text_area ep.name, class: 'input' %&gt;
+        &lt;% else %&gt;
+          &lt;%= property.text_field ep.name, class: 'input' %&gt;
+        &lt;% end %&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;% end %&gt;
+  &lt;% end %&gt;
+
+  &lt;div class="field"&gt;
+    &lt;div class="control"&gt;
+      &lt;%= form.submit 'Save', class: 'button is-link' %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;% end %&gt;
+</code></pre></div></div>
+<p>views/page_elements/elements/_text.html.erb</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;div id=&lt;%= "text-#{dom_id(page_element)}" %&gt; style="&lt;%= text_styles(page_element.properties) %&gt;"&gt;
+  &lt;p&gt;&lt;%= page_element.properties["text_value"].present? ? page_element.properties["text_value"] : "Text goes here" %&gt;&lt;/p&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+<p>helpers/text_helper.rb</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module TextHelper
+  def text_styles(properties)
+    styles = ""
+    styles &lt;&lt; "color:" &lt;&lt; properties["text_color"].to_s &lt;&lt; ";"
+    styles &lt;&lt; "text-align:" &lt;&lt; properties["text_align"].to_s &lt;&lt; ";"
+    styles &lt;&lt; "padding-top:" &lt;&lt; properties["padding_top"].to_s &lt;&lt; "px;"
+    styles &lt;&lt; "padding-bottom:" &lt;&lt; properties["padding_bottom"].to_s &lt;&lt; "px;"
+    styles &lt;&lt; "padding-left:" &lt;&lt; properties["padding_left"].to_s &lt;&lt; "px;"
+    styles &lt;&lt; "padding-right:" &lt;&lt; properties["padding_right"].to_s &lt;&lt; "px;"
+    styles
+  end
+end
+
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+<p>This was a fun project. There is a ton of room for improvement. My way of working is I try to make it work and then I make it “pretty”. So I got it to work, and next step is to interate on it to make it better. I hope you enjoyed it and find something useful.</p>
+
+    </div>
+  </section>
+</article>
+
+
+    </main>
+
+    <footer class="footer footer-center p-10 bg-gray-600 text-white rounded">
+  <div class="grid grid-flow-col gap-4">
+    <a class="link link-hover">About</a> 
+    <a class="link link-hover">Post</a> 
+    <a class="link link-hover">Projects</a> 
+  </div> 
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <span>
+        <a href="https://github.com/jamgar">GitHub</a>
+      </span>
+    </div>
+  </div> 
+  <div>
+    <p>Copyright © 2022 - All right reserved by James Garcia</p>
+  </div>
+</footer>
+
+  </body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="James Garcia" />
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Binged Watched (almost) a Rails Upgrade | James Garcia</title>
+
+<meta name="description" content="James Garcia - Web developer" />
+
+<link rel="stylesheet" href="/_bridgetown/static/css/main.c4aa4b876deed32762e8.css" />
+<script src="/_bridgetown/static/js/main.3e63050e6041267a18e4.js" defer></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  </head>
+  <body class="post ">
+    <div class="navbar bg-amber-300 font-medium">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+        <li>
+          <a class="navbar-item" href="/">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/about">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/posts">
+            Posts
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/projects">
+            Projects
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/about">
+          About
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/posts">
+          Posts
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/projects">
+          Projects
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end"></div>
+</div>
+
+
+    <main>
+      <article class="mt-20 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  Binged Watched (almost) a Rails Upgrade
+  </h1>
+
+  <section class="md:px-0 px-4">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-900 ">
+          James Garcia
+        </div>
+      <div class="text-base font-light text-gray-500">
+        2023-10-26 01:13:49 UTC
+      </div>
+
+    </div>
+    <div class="">
+      <p>I watched Chad Pytel and other developers from thoughtbot <a href="https://www.youtube.com/watch?v=gQIYXc8y-UM&amp;list=PL8tzorAO7s0huVF53GLeKbqNmMbwJ5JGF&amp;pp=iAQB">Upgrading a Rails 3.2 app to Rails 7</a>. Be warned it 17 hours over several videos, but it was well worth the time invested. 🙂 I wanted to share some things that I learned.</p>
+
+<p>As you will find out from the video this app is part of a book <a href="https://thoughtbot.com/ruby-science/">Ruby Science</a> that was written over a decade ago. Now Chad is going through the update of the app and book. This video series was like finding a treasure chess full of Ruby’s 😉. I have never had to upgrade a Rails app that old so this was great to watch and learn.</p>
+
+<h3 id="historical-knowledge-of-the-framework-is-super-helpful">Historical knowledge of the framework is super helpful.</h3>
+
+<p>Not sure how long Chad has been a Ruby developer, but it seems from the early days of Rails. His historical knowledge of the framework seemed to allow him to move faster then if someone who did not have the context. I image, if it was me, I would have to spend alot more time researching how the framework or language worked during the time of that version.</p>
+
+<h3 id="upgrade-options">Upgrade options</h3>
+
+<p>Since there was such a large gap between the versions of Rails, one option could have been to spin up a new app. Then go through the process of copy and pasting. As Chad explained this may work, but could be risky because after investing the time you could find out that the app doesn’t work. The other, and more common, approach is to upgrade incrementally through various versions. This was the approach taken in the videos.</p>
+
+<h3 id="be-patient-and-make-minimal-changes">Be patient and make minimal changes.</h3>
+
+<p>Along the lines of upgrading incrementally, be patient. I learned that it could be tempting to do large version jumps but that will be a bad idea. The approach taken was to upgrade the versions of Rail and Ruby independently. For instance, upgrade to a version of Rails fix any errors. Then run the test suite and fix any failures. Commit the changes. Next upgrade the Ruby version, if needed, fix any errors. Then run the test suite and fix any failures. Commit changes. Rinse and repeat. By using this approach you are not scratching your head wondering if this is Rails or Ruby causing the issue.</p>
+
+<h3 id="other-tips">Other Tips</h3>
+
+<ul>
+  <li>Stay on the recommended Ruby verison for Rails as long as possible. You can see a compatibility table <a href="https://www.fastruby.io/blog/ruby/rails/versions/compatibility-table.html">here</a>.</li>
+  <li>Upgrade to highest patch version because it is likely that bugs have been fixed.</li>
+  <li>Create a branch for each version change.</li>
+  <li>Identify if the errors are because of the Rails/Ruby version or the app code</li>
+  <li>Some gems or dependencies of gem may be the culprit of errors. You may have to lock down to a working version, until you get to a more modern version.</li>
+  <li>You can use the rubygems.org to compare release dates of a rails version and gem version to know what version in the gem file to set for the offending gem.</li>
+  <li>Take note of changes that may need to revert when you get to a newer version. For instance if you have to add and/or lock down a version of a gem you may have to remove it later.</li>
+  <li>Take break if you are working through an error/failure and not making progress. Go work on something else, and then come back.</li>
+  <li>railsdiff.org is a tool that can compare different Rails versions and their changes.</li>
+  <li>Refer to the <a href="https://guides.rubyonrails.org/upgrading_ruby_on_rails.html">upgrade guides</a> for guidance on some things that have changed.</li>
+</ul>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>I am thankful for the time and effort that Chad and the other thoughboters put into this upgrade. From someone that does not experience in this area it was great to watch and learn. Keep up the awesome content.</p>
+
+    </div>
+  </section>
+</article>
+
+
+    </main>
+
+    <footer class="footer footer-center p-10 bg-gray-600 text-white rounded">
+  <div class="grid grid-flow-col gap-4">
+    <a class="link link-hover">About</a> 
+    <a class="link link-hover">Post</a> 
+    <a class="link link-hover">Projects</a> 
+  </div> 
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <span>
+        <a href="https://github.com/jamgar">GitHub</a>
+      </span>
+    </div>
+  </div> 
+  <div>
+    <p>Copyright © 2022 - All right reserved by James Garcia</p>
+  </div>
+</footer>
+
+  </body>
+</html>

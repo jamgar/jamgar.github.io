@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="James Garcia" />
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>How to create a takout app with rails 7 | James Garcia</title>
+
+<meta name="description" content="James Garcia - Web developer" />
+
+<link rel="stylesheet" href="/_bridgetown/static/css/main.c4aa4b876deed32762e8.css" />
+<script src="/_bridgetown/static/js/main.3e63050e6041267a18e4.js" defer></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  </head>
+  <body class="post ">
+    <div class="navbar bg-amber-300 font-medium">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+        <li>
+          <a class="navbar-item" href="/">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/about">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/posts">
+            Posts
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/projects">
+            Projects
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/about">
+          About
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/posts">
+          Posts
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/projects">
+          Projects
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end"></div>
+</div>
+
+
+    <main>
+      <article class="mt-20 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  How to create a takout app with rails 7
+  </h1>
+
+  <section class="md:px-0 px-4">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-900 ">
+          James Garcia
+        </div>
+      <div class="text-base font-light text-gray-500">
+        2022-04-06
+      </div>
+
+    </div>
+    <div class="">
+      <p>We will go through building a simple online order takeout app using Rails 7. A user will be presented with a menu and then they can add items to the cart. When they are finished adding items to their cart they will go to the checkout page and pay. Once the user pays then the order they are presented with a confirmation page, and the order will show up in real time, on the orders page to be fullfilled by the server. The completed repo is <a href="https://github.com/jamgar/takeoutapp">here</a></p>
+
+<p>The idea is to get to use Hotwire, that comes with Rails 7, in a different scenario than a chat app. I won’t go into detail on how it works, but if you are interested in learning more I would recommend this free resource <a href="https://www.hotrails.dev/">Hotrails</a> by Alexandre.</p>
+
+<h3 id="lets-start"><strong>Let’s start</strong></h3>
+
+<p>Before we get started I am using:</p>
+<ul>
+  <li>ruby 2.7.3</li>
+  <li>rails 7.0.2.2</li>
+</ul>
+
+<p>I will be creating a new rails app using Tailwind css this is for styling, and we will use the default sqlite3 for the database. Using Tailwind is optional, but wanted to try out the new css flag.</p>
+
+<p><code class="highlighter-rouge">rails new takeoutapp --css tailwind</code></p>
+
+<p>Change into the new app directory</p>
+
+<p><code class="highlighter-rouge">cd takeoutapp</code></p>
+
+<p>We can run the app to make sure that you get the rails default page. If you are new to Rails 7 you will notice that you will need to run <code class="highlighter-rouge">./bin/dev</code> instead of <code class="highlighter-rouge">rails s</code> that is because in Rails 7 there is a Procfile.dev file that has the following commands to start the server and watch for CSS changes.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web: bin/rails server -p 3000
+css: bin/rails tailwindcss:watch
+</code></pre></div></div>
+
+<p><img src="/images/takeoutapp_rails_7_default_page.png" alt="takeoutapp_rails_7_default_page" /></p>
+
+<h3 id="customer-pages"><strong>Customer Pages</strong></h3>
+
+<p>Customer pages are the pages that the customer will see or interact with. Create a Customer controller. In the terminal enter:</p>
+
+<p><code class="highlighter-rouge">rails generate controller Customers index menu checkout confirmation</code></p>
+
+<p>Open the app in you code editor. Go to the <code class="highlighter-rouge">routes.rb</code> page and update the <code class="highlighter-rouge">get 'customers/index'</code> to <code class="highlighter-rouge">root 'customers#index'</code>. Now when you refresh the browser it will land on the customers index page. Lets change the text on that page.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/customers/index.html.erb</span>
+
+<span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">h1</span> <span class="k">class</span><span class="o">=</span><span class="s2">"font-bold text-4xl"</span><span class="o">&gt;</span><span class="no">Takeout</span> <span class="no">App</span><span class="o">&lt;</span><span class="sr">/h1&gt;
+  &lt;p&gt;Order online and pickup when ready&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sr">/div&gt;
+
+</span></code></pre></div></div>
+
+<p>Next create the navigation. Create a <code class="highlighter-rouge">shared</code> folder under <code class="highlighter-rouge">app/views</code>. Inside the new folder create a partial <code class="highlighter-rouge">_navigation.html.erb</code>. Add the following:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/shared/_navigation.html.erb</span>
+<span class="o">&lt;</span><span class="n">nav</span> <span class="k">class</span><span class="o">=</span><span class="s2">"flex justify-between bg-gray-800 text-white py-4"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">span</span> <span class="k">class</span><span class="o">=</span><span class="s2">"font-semibold px-4"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= link_to "TAKEOUT APP", root_path %&gt;
+  &lt;/span&gt;
+  &lt;div class=</span><span class="s2">"px-4 text-gray-200"</span><span class="o">&gt;</span>
+    <span class="o">&lt;!--</span> <span class="n">links</span> <span class="n">will</span> <span class="n">go</span> <span class="n">here</span> <span class="o">--&gt;</span>
+  <span class="o">&lt;</span><span class="sr">/div&gt;
+&lt;/n</span><span class="n">av</span><span class="o">&gt;</span>
+</code></pre></div></div>
+<p>Add the navigation partial to the <code class="highlighter-rouge">layouts/application.html.erb</code> file.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/layouts/application.html.erb</span>
+
+<span class="o">...</span>
+  <span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= render 'shared/navigation' %&gt; # &lt;-- add this line
+    &lt;main class=</span><span class="s2">"container mx-auto mt-28 px-5"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= yield %&gt;
+    &lt;/main&gt;
+  &lt;/body&gt;
+...
+</span></code></pre></div></div>
+
+<h3 id="categories"><strong>Categories</strong></h3>
+
+<p>This is for the different sections of the menu (i.e. appetizer, entrees, etc.). Then each menu item will belong to a category. For this we will just scaffold the resource. In your terminal run:</p>
+
+<p><code class="highlighter-rouge">rails g scaffold category name:string description:text</code></p>
+
+<p>Next you will need to run  <code class="highlighter-rouge">rails db:migrate</code> to add the categories table to the database. You can not go to localhost:3000/categories and be taken to the Category index page. Let’s update the navigation page to have a link for the categories.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/shared/_navigation.html.erb</span>
+<span class="o">&lt;</span><span class="n">nav</span> <span class="k">class</span><span class="o">=</span><span class="s2">"flex justify-between bg-gray-800 text-white py-4"</span><span class="o">&gt;</span>
+  <span class="o">...</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"px-4 text-gray-200"</span><span class="o">&gt;</span>
+    <span class="o">&lt;!--</span> <span class="n">links</span> <span class="n">will</span> <span class="n">go</span> <span class="n">here</span> <span class="o">--&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= link_to "Categories", categories_path, class: "pr-4 hover:font-medium hover:text-white" %&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+</span></code></pre></div></div>
+<p>Before moving to the next resource let’s add three new categories. If you are not already the Category index page click the newly add navigation. Add the following three new categories.</p>
+<ul>
+  <li><strong>Name:</strong> Appetizers, <strong>Description:</strong> Appetizers</li>
+  <li><strong>Name:</strong> Entrees, <strong>Description:</strong> Entrees</li>
+  <li><strong>Name:</strong> Drinks, <strong>Description:</strong> Drinks</li>
+</ul>
+
+<p><img src="/images/takeoutapp_categories.png" alt="takeoutapp_categories" /></p>
+
+<h3 id="menu-items"><strong>Menu Items</strong></h3>
+
+<p>The next resource is the Menu items, which be used to create the menu. We will scaffold this out since this will not have anything special.</p>
+
+<p><code class="highlighter-rouge">rails generate scaffold menu_item name:string description:text price:decimal available:boolean category:belongs_to</code></p>
+
+<p>Again we namespace the resource. Run <code class="highlighter-rouge">rails db:migrate</code> to add the migrations. Start the server and navigate to localhost:3000/menu_items. Add a validation to the model to require the name to be present.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/menu_items.rb</span>
+<span class="k">class</span> <span class="nc">MenuItem</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="o">...</span>
+  <span class="n">validates</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>We need to update the navigation page to have a link for the menu_items.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/shared/_navigation.html.erb</span>
+<span class="o">&lt;</span><span class="n">nav</span> <span class="k">class</span><span class="o">=</span><span class="s2">"flex justify-between bg-gray-800 text-white py-4"</span><span class="o">&gt;</span>
+  <span class="o">...</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"px-4 text-gray-200"</span><span class="o">&gt;</span>
+    <span class="o">...</span>
+    <span class="o">&lt;</span><span class="sx">%= link_to "Menu Items", menu_items_path, class: "pr-4 hover:font-medium hover:text-white" %&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+</span></code></pre></div></div>
+<p>While we are on the menu_items index page click the New menu items button you may notice that Category is a text field. We will want that to be select box that is filled with the Categories we created earlier. Open the _form.html.erb under app/views/menu_items and change the current select to the below.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/menu_items/_form.html.erb</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"my-5"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= form.label :category_id, class:"block" %&gt;
+  &lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">collection_select</span> <span class="ss">:category_id</span><span class="p">,</span> <span class="no">Category</span><span class="p">.</span><span class="nf">all</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="p">{</span> <span class="ss">prompt: </span><span class="kp">true</span> <span class="p">},</span> <span class="p">{</span> <span class="ss">class: </span><span class="s2">"mt-2 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm"</span> <span class="p">}</span> <span class="o">%&gt;</span>
+<span class="o">&lt;</span><span class="sr">/div&gt;
+</span></code></pre></div></div>
+
+<p>If you refresh the page it will have a select box with the categories. Now add the following menu items.</p>
+<ul>
+  <li><strong>Name</strong> Chips and Salsa, <strong>Description</strong> Chips and Salsa, <strong>Available</strong> checked, <strong>Categories</strong> Appetizers, <strong>Price</strong> 2.75</li>
+  <li><strong>Name</strong> Burger, <strong>Description</strong> Burger, <strong>Available</strong> checked, <strong>Categories</strong> Entree, <strong>Price</strong> 10.00</li>
+  <li><strong>Name</strong> Soda, <strong>Description</strong> Soda, <strong>Available</strong> checked, <strong>Categories</strong> Drinks, <strong>Price</strong> 1.50</li>
+  <li><strong>Name</strong> Fries, <strong>Description</strong> Fries, <strong>Available</strong> <em>unchecked</em>, <strong>Categories</strong> Appetizers, <strong>Price</strong> 2.25</li>
+</ul>
+
+<p>For the fries I have them unchecked to test that we are only showing available options when we get to showing the menu.</p>
+
+<h3 id="menu-and-cart"><strong>Menu and Cart</strong></h3>
+
+<p>The next item is the Menu and Cart. They will both appear on the same page, and will be handled by the CustomersController. Open the customers_controller.rb and add the following to the menu action.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/customers_controller.rb</span>
+  <span class="k">def</span> <span class="nf">menu</span>
+    <span class="vi">@menu_items</span> <span class="o">=</span> <span class="no">MenuItem</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">available: </span><span class="kp">true</span><span class="p">)</span>
+    <span class="vi">@appetizers</span> <span class="o">=</span> <span class="no">MenuItem</span><span class="p">.</span><span class="nf">available_appetizers</span>
+    <span class="vi">@entrees</span> <span class="o">=</span> <span class="no">MenuItem</span><span class="p">.</span><span class="nf">available_entrees</span>
+    <span class="vi">@drinks</span> <span class="o">=</span> <span class="no">MenuItem</span><span class="p">.</span><span class="nf">available_drinks</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Basically what we are doing here is querying the MenuItem model to for specific items. This will require use to add scopes to the MenuItem model. I feel there may be a better way to handle this, but haven’t found it yet. Next add the scopes to the menu_item.rb.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/model/menu_item.rb</span>
+<span class="k">class</span> <span class="nc">MenuItem</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+ <span class="o">...</span>
+  <span class="n">scope</span> <span class="ss">:available_appetizers</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">available: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">category_id: </span><span class="mi">1</span><span class="p">)}</span>
+  <span class="n">scope</span> <span class="ss">:available_entrees</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">available: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">category_id: </span><span class="mi">2</span><span class="p">)}</span>
+  <span class="n">scope</span> <span class="ss">:available_drinks</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">available: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">category_id: </span><span class="mi">3</span><span class="p">)}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>As the name states it will return the specific items that are also marked as available. Now we need to have them appear on the Menu page. Open the the Menu view and replace with the following.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;% if notice.present? %&gt;
+  &lt;p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"&gt;&lt;%= notice %&gt;&lt;/p&gt;
+&lt;% end %&gt;
+&lt;div class="grid grid-cols-3 gap-4 w-full"&gt;
+  &lt;div class="col-span-2"&gt;
+    &lt;h1 class="font-bold text-4xl"&gt;Takeout Menu&lt;/h1&gt;
+    &lt;p&gt;Start your order here&lt;/p&gt;
+
+    &lt;section class="mt-6"&gt;
+      &lt;h3 class="font-semibold text-2xl text-center"&gt;Appetizers&lt;/h3&gt;
+      &lt;%= render 'customers/menu_item', category: @appetizers %&gt;
+    &lt;/section&gt;
+
+    &lt;section class="mt-6"&gt;
+      &lt;h3 class="font-semibold text-2xl text-center"&gt;Entrees&lt;/h3&gt;
+      &lt;%= render 'customers/menu_item', category: @entrees %&gt;
+    &lt;/section&gt;
+
+    &lt;section class="mt-6"&gt;
+      &lt;h3 class="font-semibold text-2xl text-center"&gt;Drinks&lt;/h3&gt;
+      &lt;%= render 'customers/menu_item', category: @drinks %&gt;
+    &lt;/section&gt; 
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;!-- cart goes here --&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+
+<p>We need to add a menu_item partial so we can show each item per category. Add file under app/views/customers called _menu_items.html.erb.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="sx">% category.each </span><span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span> <span class="sx">%&gt;
+  &lt;div class="flex border-b py-4 px-2 items-center"&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= form_with(model: [@cart, CartItem.new]) do |form| %&gt;
+      &lt;div class=</span><span class="s2">"inline"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="sx">%= form.hidden_field :menu_item_id, value: item.id %&gt;
+        &lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">submit</span> <span class="s2">"+"</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"text-xl font-bold cursor-pointer"</span> <span class="o">%&gt;</span>
+      <span class="o">&lt;</span><span class="sr">/div&gt;
+    &lt;% end %&gt;
+
+    &lt;div class="ml-4 flex-auto"&gt;
+      &lt;p&gt;&lt;%= item.name %&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nb">p</span> <span class="k">class</span><span class="o">=</span><span class="s2">"text-xs text-gray-700 mt-2 px-1"</span><span class="o">&gt;&lt;</span><span class="sx">%= item.description %&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;p&gt;&lt;%=</span> <span class="n">number_to_currency</span><span class="p">(</span><span class="n">item</span><span class="p">.</span><span class="nf">price</span><span class="p">)</span> <span class="o">%&gt;&lt;</span><span class="sr">/p&gt;
+  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</code></pre></div></div>
+
+<p>We will use a form here to submit the request to add the menu item to the cart_item, which we will be creating next, along with the cart. I am using a rails helper ‘number_to_currency’ to format the price.</p>
+
+<p>There are different ways to create cart. One is by using a session only, and the other by persisting the cart to the database and then destroying it after processing the order. I will be persisting it to the database.</p>
+
+<p>We will create two scaffolds one for cart and the other for cart_items. Open your terminal and running the following</p>
+
+<p><code class="highlighter-rouge">rails generate scaffold cart</code></p>
+
+<p><code class="highlighter-rouge">rails generate scaffold cart_item cart:belongs_to menu_item:belongs_to</code></p>
+
+<p>Cart will only be used to create an ID for the session and association to the cart_items. cart_items will belong to both the cart and menu_items. Next you will need to run  <code class="highlighter-rouge">rails db:migrate</code> to add the two tables.</p>
+
+<p>We will need to update the cart model for the has_many cart_items association. Open the cart model and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/model/cart.rb</span>
+<span class="k">class</span> <span class="nc">Cart</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">has_many</span> <span class="ss">:cart_items</span><span class="p">,</span> <span class="ss">dependent: :destroy</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Next we will update the routes.rb to have cart_items nested in carts. Make the following change to the routes file.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># /config/routes.rb</span>
+  <span class="n">resources</span> <span class="ss">:carts</span> <span class="k">do</span>
+    <span class="n">resources</span> <span class="ss">:cart_items</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Since we will be using nesting we need to update the cart_items controller. Carts controller will stay the same. We will only need the <code class="highlighter-rouge">create</code> and <code class="highlighter-rouge">destroy</code> actions so all others can be removed or commentted out. We will add a before_action to set the cart for both actions called set_cart. Then only have the set_cart_item called for the <code class="highlighter-rouge">destroy</code> action. The <code class="highlighter-rouge">create</code> action will be updated for to be redirected to the menu_path since we want it to stay on the that page when an item is added. We will also create the set_cart private method. Full controller below.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/cart_items_controller.rb</span>
+<span class="k">class</span> <span class="nc">CartItemsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="n">before_action</span> <span class="ss">:set_cart_item</span><span class="p">,</span> <span class="ss">only: </span><span class="sx">%i[ destroy ]</span>
+  <span class="n">before_action</span> <span class="ss">:set_cart</span><span class="p">,</span> <span class="ss">only: </span><span class="sx">%i[ create destroy ]</span>
+
+
+  <span class="c1"># POST /cart_items or /cart_items.json</span>
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="vi">@cart_item</span> <span class="o">=</span> <span class="vi">@cart</span><span class="p">.</span><span class="nf">cart_items</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">cart_item_params</span><span class="p">)</span>
+
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="k">if</span> <span class="vi">@cart_item</span><span class="p">.</span><span class="nf">save</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">customers_menu_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s2">"Item was added."</span> <span class="p">}</span>
+        <span class="c1"># format.html { redirect_to cart_cart_item_url(@cart_item), notice: "Cart item was successfully created." }</span>
+        <span class="c1"># format.json { render :show, status: :created, location: @cart_item }</span>
+      <span class="k">else</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">customers_menu_path</span><span class="p">,</span> <span class="ss">status: :unprocessable_entity</span><span class="p">,</span> <span class="ss">notice: </span><span class="s2">"Item was not added. Try again."</span> <span class="p">}</span>
+        <span class="c1"># format.html { render :new, status: :unprocessable_entity }</span>
+        <span class="c1"># format.json { render json: @cart_item.errors, status: :unprocessable_entity }</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># DELETE /cart_items/1 or /cart_items/1.json</span>
+  <span class="k">def</span> <span class="nf">destroy</span>
+    <span class="vi">@cart_item</span><span class="p">.</span><span class="nf">destroy</span>
+
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">cart_cart_items_url</span><span class="p">,</span> <span class="ss">notice: </span><span class="s2">"Cart item was successfully destroyed."</span> <span class="p">}</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">turbo_stream</span> <span class="c1"># &lt;- Notice a turbo_stream format is needed now for Rails 7</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="kp">private</span>
+    <span class="c1"># Use callbacks to share common setup or constraints between actions.</span>
+    <span class="k">def</span> <span class="nf">set_cart_item</span>
+      <span class="vi">@cart_item</span> <span class="o">=</span> <span class="no">CartItem</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">set_cart</span>
+      <span class="vi">@cart</span> <span class="o">=</span> <span class="no">Cart</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:cart_id</span><span class="p">])</span>
+    <span class="k">end</span>
+
+    <span class="c1"># Only allow a list of trusted parameters through.</span>
+    <span class="k">def</span> <span class="nf">cart_item_params</span>
+      <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:cart_item</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:cart_id</span><span class="p">,</span> <span class="ss">:menu_item_id</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>You will also notice that a turbo_stream format was added to the <code class="highlighter-rouge">destroy</code> action. That is because we don’t want a page refresh when we remove a item from the the cart. Later, we will creating the cart_item view which will use a <code class="highlighter-rouge">button_to</code> for a delete button and it will submit a turbo_stream and the destory will expect a format of turbo_stream and turbo_stream file, which by default the scaffold does not add. Let’s create the turbo_stream file for the destroy action. Create a new file called destroy.turbo_stream.erb under the /views/cart_items folder and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/cart_items/destroy.turbo_stream.erb</span>
+<span class="o">&lt;</span><span class="sx">%= turbo_stream.remove "cart_item_#{@cart_item.id}" %&gt; 
+&lt;%=</span> <span class="n">turbo_stream</span><span class="p">.</span><span class="nf">update</span> <span class="s2">"total"</span><span class="p">,</span> <span class="ss">partial: </span><span class="s2">"public/total"</span><span class="p">,</span> <span class="ss">locals: </span><span class="p">{</span> <span class="ss">cart: </span><span class="vi">@cart</span> <span class="p">}</span> <span class="o">%&gt;</span>
+</code></pre></div></div>
+
+<p>This will remove the cart_item partial and then update the running total. Both the of will be handle soon.</p>
+
+<p>There are a couple of more items to add and then we can test the menu page. As I said previously we will use the method of persisting the cart to the database and a session. So when a customer goes to the <code class="highlighter-rouge">customers/menu</code> page will check if they have a cart in persisted and if not we will create it. Open the <code class="highlighter-rouge">customers_controller.rb</code> and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/customers_controller.rb</span>
+<span class="k">class</span> <span class="nc">CustomersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="n">before_action</span> <span class="ss">:set_cart</span><span class="p">,</span> <span class="ss">only: </span><span class="sx">%i[ menu checkout ]</span>
+
+<span class="o">...</span>
+
+  <span class="kp">private</span>
+
+    <span class="k">def</span> <span class="nf">set_cart</span>
+      <span class="vi">@cart</span> <span class="o">=</span> <span class="no">Cart</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="ss">:cart_id</span><span class="p">])</span>
+      <span class="k">rescue</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">RecordNotFound</span>
+      <span class="vi">@cart</span> <span class="o">=</span> <span class="no">Cart</span><span class="p">.</span><span class="nf">create</span>
+      <span class="n">session</span><span class="p">[</span><span class="ss">:cart_id</span><span class="p">]</span> <span class="o">=</span> <span class="vi">@cart</span><span class="p">.</span><span class="nf">id</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>We will use a before_action to set the cart. We will use a rescue to catch the error if record is not found and the create and store the cart. Next add the menu page to the navigation partial.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/shared/_navigation.html.erb</span>
+<span class="o">&lt;</span><span class="n">nav</span> <span class="k">class</span><span class="o">=</span><span class="s2">"flex justify-between bg-gray-800 text-white py-4"</span><span class="o">&gt;</span>
+  <span class="o">...</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"px-4 text-gray-200"</span><span class="o">&gt;</span>
+    <span class="o">&lt;!--</span> <span class="n">links</span> <span class="n">will</span> <span class="n">go</span> <span class="n">here</span> <span class="o">--&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= link_to "Menu", customers_menu_path, class: "pr-4 hover:font-medium hover:text-white" %&gt;
+    ...
+  &lt;/div&gt;
+&lt;/nav&gt;
+
+</span></code></pre></div></div>
+
+<p>Start the server with running the following in the terminal <code class="highlighter-rouge">./bin/dev</code> click on the Menu link and you should see the list of menu items that we created earier.</p>
+
+<p><img src="/images/takeoutapp_menu.png" alt="takeoutapp_menu" /></p>
+
+<p>Let’s add the cart to the menu page next to the menu items. Under the <code class="highlighter-rouge">&lt;!-- cart goes here --&gt;</code> add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/customers/menu.html.erb</span>
+<span class="o">...</span>
+<span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;!--</span> <span class="n">cart</span> <span class="n">goes</span> <span class="n">here</span> <span class="o">--&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"mb-4"</span><span class="o">&gt;</span>
+    <span class="o">&lt;!--</span> <span class="n">checkout</span> <span class="n">button</span> <span class="n">goes</span> <span class="n">here</span> <span class="o">--&gt;</span>
+  <span class="o">&lt;</span><span class="sr">/div&gt;
+  &lt;div class="border rounded"&gt;
+    &lt;h4 class="font-medium text-xl text-center py-4 border-b"&gt;Cart&lt;/</span><span class="n">h4</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= render @cart.cart_items %&gt;
+
+    &lt;div class=</span><span class="s2">"flex items-center"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nb">p</span> <span class="k">class</span><span class="o">=</span><span class="s2">"flex-auto py-4 px-2"</span><span class="o">&gt;</span><span class="no">Total</span><span class="ss">:&lt;</span><span class="o">/</span><span class="nb">p</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= turbo_frame_tag "total" do %&gt;
+        &lt;%=</span> <span class="n">render</span> <span class="s2">"total"</span><span class="p">,</span> <span class="ss">cart: </span><span class="vi">@cart</span> <span class="o">%&gt;</span>
+      <span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+    <span class="o">&lt;</span><span class="sr">/div&gt;
+  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sr">/div&gt;
+</span></code></pre></div></div>
+
+<p>The two main items to point out is that we will render a cart_item partial and a running total. Next we will update the cart_item partial from what the scaffold created.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/cart_items/_cart_item.html.erb</span>
+<span class="o">&lt;</span><span class="sx">%= turbo_frame_tag dom_id(cart_item) do %&gt;
+  &lt;div class=</span><span class="s2">"flex border-b items-center"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nb">p</span> <span class="k">class</span><span class="o">=</span><span class="s2">"flex-auto py-4 px-2"</span><span class="o">&gt;&lt;</span><span class="sx">%= cart_item.menu_item.name %&gt;&lt;/p&gt;
+    &lt;p class=</span><span class="s2">"mr-2 py-4"</span><span class="o">&gt;&lt;</span><span class="sx">%= number_to_currency(cart_item.menu_item.price) %&gt;&lt;/p&gt;
+    &lt;%=</span> <span class="n">button_to</span> <span class="n">cart_cart_item_path</span><span class="p">(</span><span class="vi">@cart</span><span class="p">,</span> <span class="n">cart_item</span><span class="p">),</span> <span class="ss">method: :delete</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"text-red-600 py-4 pr-2 hover:text-red-900"</span> <span class="k">do</span> <span class="sx">%&gt;
+      &lt;svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;</span>
+        <span class="o">&lt;</span><span class="n">path</span> <span class="n">stroke</span><span class="o">-</span><span class="n">linecap</span><span class="o">=</span><span class="s2">"round"</span> <span class="n">stroke</span><span class="o">-</span><span class="n">linejoin</span><span class="o">=</span><span class="s2">"round"</span> <span class="n">stroke</span><span class="o">-</span><span class="n">width</span><span class="o">=</span><span class="s2">"2"</span> <span class="n">d</span><span class="o">=</span><span class="s2">"M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"</span> <span class="o">/&gt;</span>
+      <span class="o">&lt;</span><span class="sr">/svg&gt;
+    &lt;% end %&gt;
+  &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</code></pre></div></div>
+
+<p>The main item here is the <code class="highlighter-rouge">&lt;%= turbo_frame_tag dom_id(cart_item) do %&gt;</code>. This is used for the destroy.turbo_stream.erb file we added to the cart_item views to locate the correct item to remove from the cart. Next we create the running total partial. Under customers view create a <code class="highlighter-rouge">_total.html.erb</code> file. Add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/customers/_total.html.erb</span>
+<span class="o">&lt;</span><span class="nb">p</span> <span class="k">class</span><span class="o">=</span><span class="s2">"mr-2 py-4"</span><span class="o">&gt;&lt;</span><span class="sx">%= number_to_currency(cart.total) %&gt;&lt;/p&gt;
+</span></code></pre></div></div>
+
+<p>You will see in the total partial a <code class="highlighter-rouge">cart.total</code> this has to be added to the model to calculate the total. Let’s open the cart model and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/cart.rb</span>
+<span class="k">class</span> <span class="nc">Cart</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="o">...</span>
+  <span class="k">def</span> <span class="nf">total</span>
+    <span class="n">cart_items</span><span class="p">.</span><span class="nf">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">i</span><span class="p">.</span><span class="nf">menu_item</span><span class="p">.</span><span class="nf">price</span> <span class="p">}.</span><span class="nf">sum</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>You should now be able to add and remove items to the cart. Yay!</p>
+
+<h3 id="checkout-and-orders"><strong>Checkout and Orders</strong></h3>
+
+<p>This next section we will cover the Checkout, placing, and fulling orders. Checkout will be are action in the customer_controller. We will handle this first. Open the customer_controller.rb and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/customers_controller.rb</span>
+  <span class="o">...</span>
+
+  <span class="k">def</span> <span class="nf">checkout</span>
+    <span class="vi">@order</span> <span class="o">=</span> <span class="no">Order</span><span class="p">.</span><span class="nf">new</span>
+  <span class="k">end</span>
+
+  <span class="o">...</span>
+</code></pre></div></div>
+
+<p>Next go to the customers views and open the checkout.html.erb file and add the following.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/customers/checkout.html.erb
+&lt;div class="w-full"&gt;
+  &lt;% if notice.present? %&gt;
+    &lt;p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"&gt;&lt;%= notice %&gt;&lt;/p&gt;
+  &lt;% end %&gt;
+
+  &lt;h1 class="font-bold text-4xl"&gt;Checkout&lt;/h1&gt;
+  &lt;div class="flex justify-between"&gt;
+    &lt;div&gt;
+      &lt;%= render "orders/form", order: @order %&gt;
+    &lt;/div&gt;
+
+    &lt;div class="border rounded"&gt;
+      &lt;h4 class="font-medium text-xl text-center py-4 border-b"&gt;Cart&lt;/h4&gt;
+      &lt;%= render @cart.cart_items %&gt;
+
+      &lt;div class="flex items-center"&gt;
+        &lt;p class="flex-auto py-4 px-2"&gt;Total:&lt;/p&gt;
+        &lt;%= turbo_frame_tag "total" do %&gt;
+          &lt;%= render "total", cart: @cart %&gt;
+        &lt;% end %&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+</code></pre></div></div>
+
+<p>Open the menu.html.erb to add the Checkout button. Add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/customers/menu.html.erb</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"mb-4"</span><span class="o">&gt;</span>
+  <span class="o">&lt;!--</span> <span class="n">checkout</span> <span class="n">button</span> <span class="n">goes</span> <span class="n">here</span> <span class="o">--&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= link_to "Checkout", customers_checkout_path, class: "rounded bg-blue-600 text-white py-2 px-4" %&gt;
+&lt;/div&gt;
+</span></code></pre></div></div>
+
+<p>That should be it for the Checkout so we can move on to the Orders. We will scaffold the orders and order_items. Open your terminal and run the following commands.</p>
+
+<p><code class="highlighter-rouge">rails generate scaffold order customer:string confirmation:string total:decimal fullfilled:boolean</code></p>
+
+<p><code class="highlighter-rouge">rails generate scaffold order_item order:belongs_to menu_item:belongs_to</code></p>
+
+<p>One changes needs to the be made to the orders migration open the <em>datetimestamp</em>_create_orders.rb file and update the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># db/migrate/&lt;datetimestamp&gt;_create_orders.rb</span>
+<span class="n">t</span><span class="p">.</span><span class="nf">boolean</span> <span class="ss">:fullfilled</span><span class="p">,</span> <span class="ss">default: </span><span class="kp">false</span> <span class="c1"># &lt;- add default: false</span>
+</code></pre></div></div>
+
+<p>This will assure that the value for fullfilled is automatically set to false. Once the order is fullfilled it will be set to true. Now run <code class="highlighter-rouge">rails db:migrate</code> in the terminal. With the migration complete you can restart the server with <code class="highlighter-rouge">./bin/dev</code>.</p>
+
+<p>Open the order model to add the following lines.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">has_many</span> <span class="ss">:order_items</span><span class="p">,</span> <span class="ss">dependent: :destroy</span>
+  
+  <span class="n">validates</span> <span class="ss">:customer</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This will complete the association to the order_items and validate the customer is present when we create the order.</p>
+
+<p>If you click the checkout button on the menu page you will see the order form. We will make the following changes, which will mimick adding a credit card payment information. Open the orders/_form.html.erb file and replace with the following.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/orders/_form.html.erb
+
+&lt;%= form_with(model: order, class: "contents") do |form| %&gt;
+  &lt;% if order.errors.any? %&gt;
+    &lt;div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3"&gt;
+      &lt;h2&gt;&lt;%= pluralize(order.errors.count, "error") %&gt; prohibited this order from being saved:&lt;/h2&gt;
+
+      &lt;ul&gt;
+        &lt;% order.errors.each do |error| %&gt;
+          &lt;li&gt;&lt;%= error.full_message %&gt;&lt;/li&gt;
+        &lt;% end %&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+
+  &lt;div class="my-5"&gt;
+    &lt;%= form.label 'Email or phone number' %&gt;
+    &lt;%= form.text_field :customer, required: true, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %&gt;
+  &lt;/div&gt;
+
+&lt;!-- Do not use: For demostration purposes to simulate a payment process --&gt;
+  &lt;span class="inline-block text-sm font-medium"&gt;Card Information&lt;/span&gt;
+  &lt;div class="mb-5"&gt;
+    &lt;%= label_tag :card_number %&gt;
+    &lt;%= text_field_tag :card_number, nil, value: '4242 4242 4242 4242', disabled: true, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %&gt;
+  &lt;/div&gt;
+
+  &lt;div class="grid grid-cols-6 gap-6"&gt;
+    &lt;div class="col-span-6 sm:col-span-3"&gt;
+      &lt;%= label_tag :expiration_date %&gt;
+      &lt;%= text_field_tag :expiration_date, nil, value: '02/30', disabled: true, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %&gt;
+    &lt;/div&gt;
+
+    &lt;div class="col-span-6 sm:col-span-3"&gt;
+      &lt;%= label_tag :cvc %&gt;
+      &lt;%= text_field_tag :cvc, nil, value: '123', disabled: true, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;!-- end of Do not use: --&gt;
+
+  &lt;div class="my-5"&gt;
+    &lt;%= form.label :total %&gt;
+    &lt;% if @cart.present? %&gt;
+      &lt;%= render "total", cart: @cart %&gt; 
+      &lt;%= form.hidden_field :total, value: @cart.total %&gt;
+    &lt;% else %&gt;
+      &lt;%= form.number_field :total, disabled: true, class: "block border-none outline-none px-3 py-2 mt-2 w-full" %&gt;
+    &lt;% end %&gt;
+
+  &lt;/div&gt;
+
+  &lt;div class="inline"&gt;
+    &lt;%= form.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %&gt;
+  &lt;/div&gt;
+&lt;% end %&gt;
+
+</code></pre></div></div>
+
+<p>The only field that is availble to update is the <strong>Email or phone number</strong> the rest is filled in with fake information. We will create a fake payment service. First let’s update orders_controller.rb. We will update the index, create and update actions and add a private method called create_order_items. Open the controller and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/orders_controller.rb</span>
+<span class="k">class</span> <span class="nc">OrdersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="o">...</span>
+  <span class="k">def</span> <span class="nf">index</span>
+    <span class="vi">@orders</span> <span class="o">=</span> <span class="no">Order</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">fullfilled: </span><span class="kp">false</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="vi">@order</span> <span class="o">=</span> <span class="no">Order</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">order_params</span><span class="p">)</span>
+
+    <span class="c1"># located: app/services/payment_service.rb</span>
+    <span class="n">payment</span> <span class="o">=</span> <span class="no">PaymentService</span><span class="p">.</span><span class="nf">new</span><span class="p">({</span>
+      <span class="ss">cart: </span><span class="vi">@cart</span><span class="p">,</span>
+      <span class="ss">customer: </span><span class="vi">@order</span><span class="p">.</span><span class="nf">customer</span><span class="p">,</span>
+      <span class="ss">card_number: </span><span class="s2">"4242 4242 4242 4242"</span><span class="p">,</span>
+      <span class="ss">expiration_date: </span><span class="s2">"02/30"</span><span class="p">,</span>
+      <span class="ss">cvc: </span><span class="s2">"123"</span>
+    <span class="p">}).</span><span class="nf">call</span>
+
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="k">if</span> <span class="n">payment</span> <span class="o">&amp;&amp;</span> <span class="n">payment</span><span class="p">.</span><span class="nf">success?</span>
+        <span class="vi">@order</span><span class="p">.</span><span class="nf">confirmation</span> <span class="o">=</span> <span class="n">payment</span><span class="p">.</span><span class="nf">payload</span>
+
+        <span class="k">if</span> <span class="vi">@order</span><span class="p">.</span><span class="nf">save</span>
+          <span class="n">create_order_items</span>
+
+          <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">customers_confirmation_path</span><span class="p">(</span><span class="vi">@order</span><span class="p">),</span> <span class="ss">notice: </span><span class="s2">"Order was successfully created."</span> <span class="p">}</span>
+          <span class="nb">format</span><span class="p">.</span><span class="nf">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">status: :created</span><span class="p">,</span> <span class="ss">location: </span><span class="vi">@order</span> <span class="p">}</span>
+        <span class="k">else</span>
+          <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:new</span><span class="p">,</span> <span class="ss">status: :unprocessable_entity</span> <span class="p">}</span>
+          <span class="nb">format</span><span class="p">.</span><span class="nf">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">json: </span><span class="vi">@order</span><span class="p">.</span><span class="nf">errors</span><span class="p">,</span> <span class="ss">status: :unprocessable_entity</span> <span class="p">}</span>
+        <span class="k">end</span>
+      <span class="k">else</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">customers_checkout_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="n">payment</span><span class="p">.</span><span class="nf">error</span> <span class="p">}</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">update</span>
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="k">if</span> <span class="vi">@order</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">order_params</span><span class="p">)</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">orders_url</span><span class="p">,</span> <span class="ss">notice: </span><span class="s2">"Order was successfully updated."</span> <span class="p">}</span> <span class="c1"># &lt;- update this link redirect to orders index page.</span>
+
+      <span class="k">else</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:edit</span><span class="p">,</span> <span class="ss">status: :unprocessable_entity</span> <span class="p">}</span>
+        <span class="nb">format</span><span class="p">.</span><span class="nf">json</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">json: </span><span class="vi">@order</span><span class="p">.</span><span class="nf">errors</span><span class="p">,</span> <span class="ss">status: :unprocessable_entity</span> <span class="p">}</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  <span class="o">...</span>
+
+  <span class="kp">private</span>
+
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">create_order_items</span>
+      <span class="vi">@order</span><span class="p">.</span><span class="nf">transfer_cart_to_order_items</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="ss">:cart_id</span><span class="p">])</span>
+      <span class="n">session</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="s1">'cart_id'</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Several items to note. For the index action we are just pulling the orders that have not been fullfilled. Next is the PaymentService, which will create, and then in the create_order_items we will create a <code class="highlighter-rouge">transfer_cart_to_order_items</code> method on the orders model to copy the cart items to the order_items and then delete the cart_id session.</p>
+
+<p>Let’s create the PaymentService. Create a folder called services under the app folder. Then under the services folder create a payment_service.rb file and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/services/payment_service.rb</span>
+<span class="c1"># Simulate a payment gateway service</span>
+<span class="k">class</span> <span class="nc">PaymentService</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="vi">@cart</span>             <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:cart</span><span class="p">]</span>
+    <span class="vi">@customer</span>         <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:customer</span><span class="p">]</span>
+    <span class="vi">@card_number</span>      <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:card_number</span><span class="p">]</span>
+    <span class="vi">@expiration_date</span>  <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:expiration_date</span><span class="p">]</span>
+    <span class="vi">@cvc</span>              <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:cvc</span><span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">call</span>
+    <span class="k">if</span> <span class="n">process_order</span>
+      <span class="no">OpenStruct</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">success?: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">payload: </span><span class="n">confirmation</span><span class="p">)</span>
+    <span class="k">else</span>
+      <span class="no">OpenStruct</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">success?: </span><span class="kp">false</span><span class="p">,</span> <span class="ss">error: </span><span class="s2">"Payment process was unsuccessful. Try again."</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">process_order</span>
+    <span class="c1"># Change to false if you want to simulate a failed payment</span>
+    <span class="kp">true</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">confirmation</span>
+    <span class="no">SecureRandom</span><span class="p">.</span><span class="nf">alphanumeric</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Next is the we will add the <code class="highlighter-rouge">transfer_cart_to_order_items</code> to the order model. Open the order.rb model file and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/order.rb</span>
+<span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="o">...</span>
+
+  <span class="k">def</span> <span class="nf">transfer_cart_to_order_items</span><span class="p">(</span><span class="n">cart_id</span><span class="p">)</span>
+    <span class="n">cart</span> <span class="o">=</span> <span class="no">Cart</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">cart_id</span><span class="p">)</span>
+    <span class="n">cart</span><span class="p">.</span><span class="nf">cart_items</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
+      <span class="no">OrderItem</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="ss">order_id: </span><span class="nb">self</span><span class="p">.</span><span class="nf">id</span><span class="p">,</span> <span class="ss">menu_item_id: </span><span class="n">item</span><span class="p">.</span><span class="nf">menu_item_id</span><span class="p">)</span>
+    <span class="k">end</span>
+
+    <span class="n">broadcast_append_to</span> <span class="s2">"orders"</span>
+
+    <span class="n">cart</span><span class="p">.</span><span class="nf">cart_items</span><span class="p">.</span><span class="nf">delete_all</span>
+    <span class="n">cart</span><span class="p">.</span><span class="nf">delete</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>Basically we are using the cart_items from the cart and creating order_items. Once that completes we will broadcast the order so that the backend (servers) will see the new order appear on the Orders index page in real time. Next we will delete the persisted cart and cart_items.</p>
+
+<p>How does the Orders index page know to show the new order? By using a turbo_stream and turbo_frame_tag. The <code class="highlighter-rouge">&lt;%= turbo_stream_from "orders" %&gt;</code> on this page will know to listen to the broadcast. Once a new order is created the stream will ‘hear’ the new order and use the turbo_frame_tag to append the new order. Open the index.html.erb Orders page and update with the fillowing.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/orders/index.html.erb
+&lt;%= turbo_stream_from "orders" %&gt;
+&lt;div class="w-full"&gt;
+  &lt;% if notice.present? %&gt;
+    &lt;p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"&gt;&lt;%= notice %&gt;&lt;/p&gt;
+  &lt;% end %&gt;
+
+  &lt;div class="flex justify-between items-center"&gt;
+    &lt;h1 class="font-bold text-4xl"&gt;Orders&lt;/h1&gt;
+  &lt;/div&gt;
+
+
+  &lt;div class="my-8 mx-auto w-full md:w-1/2"&gt;
+    &lt;%= turbo_frame_tag "orders" do %&gt;
+      &lt;%= render @orders %&gt;
+    &lt;% end %&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+
+<p>Let’s update the orders partial. Open the _order.html.erb file and replace with the following.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/orders/_order.html.erb
+&lt;div id="&lt;%= dom_id order %&gt;" class="border rounded w-full"&gt;
+  &lt;p class="p-4 font-medium bg-gray-100"&gt;Order for: &lt;%= order.customer %&gt;&lt;/p&gt;
+  &lt;ul&gt;
+  &lt;% order.order_items.each do | item | %&gt;
+    &lt;li class="border-t py-2 px-4"&gt;&lt;%= item.menu_item.name %&gt;&lt;/li&gt;
+  &lt;% end %&gt;
+  &lt;/ul&gt;
+  &lt;div class="p-4 border-t"&gt;
+  &lt;%= form_with(model: order, method: :patch) do |form| %&gt;
+    &lt;%= form.hidden_field  :fullfilled, value: true %&gt;
+    &lt;%= form.submit "Fullfill", class: "w-full rounded-lg py-3 px-5 bg-blue-600 text-white block font-medium" %&gt;
+  &lt;% end %&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre></div></div>
+
+<p>One thing to note is that the fullfilled button/form is just going to update the order record to set fullfilled as true and will remove it from the orders index page. Let’s also add the Order link to the navigation partial. Open the navigation partial and add the following.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/shared/_navigation.html.erb
+    &lt;%= link_to "Orders", orders_path, class: "pr-4 hover:font-medium hover:text-white" %&gt;
+</code></pre></div></div>
+
+<p>That is for the backend (servers) side, but what about the customers side. If you look back at the orders_controller create action you will see that on success the customer will be redirected to the confirmation page. They will receive a confirmation code generated by the PaymentService. Lets update the customers_controller and the confirmation action. Open the customers_controller and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/customers_controller.rb</span>
+  <span class="k">def</span> <span class="nf">confirmation</span> 
+    <span class="vi">@order</span> <span class="o">=</span> <span class="no">Order</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Next open the confirmation.html.erb page to update the content with the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/customers/confirmation.html.erb</span>
+<span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">h1</span> <span class="k">class</span><span class="o">=</span><span class="s2">"font-bold text-4xl"</span><span class="o">&gt;</span><span class="no">Order</span> <span class="n">is</span> <span class="n">completed</span><span class="o">&lt;</span><span class="sr">/h1&gt;
+  &lt;p&gt;Your confirmation is: &lt;%= @order.confirmation.upcase %&gt;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="sr">/div&gt;
+</span></code></pre></div></div>
+
+<p>One more item to update is the routes.rb. Open the routes.rb and replace the get <code class="highlighter-rouge">get customers/confirmation</code> with the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/routes.rb</span>
+  <span class="n">get</span> <span class="s1">'customers/confirmation/:id'</span><span class="p">,</span> <span class="ss">to: </span><span class="s1">'customers#confirmation'</span><span class="p">,</span> <span class="ss">as: </span><span class="s1">'customers/confirmation'</span>
+</code></pre></div></div>
+
+<p>Now you should be able to open a private browser tab, and navigate to <code class="highlighter-rouge">localhost:3000/orders</code>. Then in the first browser go to Menu and step through checkout/order process. Once you click Create order you will be taken to the confirmation page while in the private browser you will see the new order appear.</p>
+
+<h3 id="conclusion"><strong>Conclusion</strong></h3>
+
+<p>I hope that this was helpful. I learned alot from it and it was fun to use the Rails 7 newness. Until next time happy coding.</p>
+
+
+    </div>
+  </section>
+</article>
+
+
+    </main>
+
+    <footer class="footer footer-center p-10 bg-gray-600 text-white rounded">
+  <div class="grid grid-flow-col gap-4">
+    <a class="link link-hover">About</a> 
+    <a class="link link-hover">Post</a> 
+    <a class="link link-hover">Projects</a> 
+  </div> 
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <span>
+        <a href="https://github.com/jamgar">GitHub</a>
+      </span>
+    </div>
+  </div> 
+  <div>
+    <p>Copyright © 2022 - All right reserved by James Garcia</p>
+  </div>
+</footer>
+
+  </body>
+</html>

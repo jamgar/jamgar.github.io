@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="James Garcia" />
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>How to use Inertia with Ruby on Rails and Vue | James Garcia</title>
+
+<meta name="description" content="James Garcia - Web developer" />
+
+<link rel="stylesheet" href="/_bridgetown/static/css/main.c4aa4b876deed32762e8.css" />
+<script src="/_bridgetown/static/js/main.3e63050e6041267a18e4.js" defer></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  </head>
+  <body class="post ">
+    <div class="navbar bg-amber-300 font-medium">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+        <li>
+          <a class="navbar-item" href="/">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/about">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/posts">
+            Posts
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/projects">
+            Projects
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/about">
+          About
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/posts">
+          Posts
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/projects">
+          Projects
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end"></div>
+</div>
+
+
+    <main>
+      <article class="mt-20 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  How to use Inertia with Ruby on Rails and Vue
+  </h1>
+
+  <section class="md:px-0 px-4">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-900 ">
+          James Garcia
+        </div>
+      <div class="text-base font-light text-gray-500">
+        2020-11-11 14:13:39 UTC
+      </div>
+
+    </div>
+    <div class="">
+      <h3 id="what-is-inertia"><strong>What is Inertia</strong></h3>
+<p>It is a JavaScript library that allows you to use modern JavaScript frameworks (React, Vue, and Svelte) with fullstack frameworks (Laravel, Rails, and Django) without needing to build out an API. You can build a monolith and use Vue for the view layer. You can also think of it as a replacement for Redux or Vuex, which are well-known routers for the React and Vue. You can read more about Inertia <a href="https://inertiajs.com/">here</a> I appreciate <a href="https://twitter.com/reinink">Jonathan Reinink</a>, the ceator, for all the hard work he has put into this project. I also want to mention there is a helpful community in the <a href="https://discord.gg/gwgxN8Y">discord</a>.</p>
+
+<h3 id="what-we-will-build"><strong>What we will build</strong></h3>
+<p>We are going to build a simple note taking app. A user will be able to create, read, update, and delete (CRUD) notes. At the end will implement authentication with Devise, and then make it where a user can only perform CRUD on their own notes. You can find the code for the completed sample project <a href="https://github.com/jamgar/inertiaapp">here</a></p>
+
+<h3 id="lets-start"><strong>Let’s start</strong></h3>
+<p>The first thing we will do is create a new folder for our app. Open the terminal. Make a new folder by running.
+<code class="highlighter-rouge">mkdir inertiaapp</code>
+Change into the new folder.
+<code class="highlighter-rouge">cd inertiaapp</code>
+Create a new rails app and add the flag to not include Turbolinks.
+<code class="highlighter-rouge">rails new . --skip-turbolinks</code>
+Why are we not including Turbolinks? It is because Turbolinks is not compatible with Inertia so you don’t need it. However, with Turbolinks being integrated with Rails hope is not lost. So, if you have an app that you want to migrate over to Inertia, and you have Turbolinks, you can disable Turbolinks for any responses sent to Inertia. I can give an example of how to do this during the Devise section. Test that the app was created successfully. In the terminal run.
+<code class="highlighter-rouge">rails s</code>
+Open the browser and navigate to
+http://localhost:3000/</p>
+
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/i/u0f7dnjtz25eecbayx4y.png" alt="new_rails image" /></p>
+
+<h3 id="add-vue"><strong>Add Vue</strong></h3>
+<p>We could have added Vue when we created the app by including the flag –webpacker=vue, but I wanted to show you the following way for anyone that has an existing project. In your terminal run.
+<code class="highlighter-rouge">rails webpacker:install:vue</code>
+Open the your code editor and open the “inertiaapp” folder. I am using VS Code. The above command created a few files and inserted some code in some files. As you can see in the terminal output.</p>
+
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/i/ve6xgnbf73fp3c93t0pu.png" alt="add_vue_output image" /></p>
+
+<p>We need to delete app.vue and hello_vue.js files that were created because we will not be using them. These were created in app/javascript and app/javascript/packs folders respectively. We still need to initialize Vue and this will be done app/javascript/packs/application.js. Add the following code below the require statements.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/packs/application.js</span>
+<span class="p">...</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">App</span><span class="p">,</span> <span class="nx">plugin</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@inertiajs/inertia-vue</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">Vue</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vue</span><span class="dl">'</span>
+
+<span class="nx">Vue</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">plugin</span><span class="p">)</span>
+
+<span class="kd">const</span> <span class="nx">el</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">app</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="k">new</span> <span class="nx">Vue</span><span class="p">({</span>
+  <span class="na">render</span><span class="p">:</span> <span class="nx">h</span> <span class="o">=&gt;</span> <span class="nx">h</span><span class="p">(</span><span class="nx">App</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">initialPage</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">page</span><span class="p">),</span>
+      <span class="na">resolveComponent</span><span class="p">:</span> <span class="nx">name</span> <span class="o">=&gt;</span> <span class="nx">require</span><span class="p">(</span><span class="s2">`../Pages/</span><span class="p">${</span><span class="nx">name</span><span class="p">}</span><span class="s2">`</span><span class="p">).</span><span class="k">default</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">}),</span>
+<span class="p">}).</span><span class="nx">$mount</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span>
+</code></pre></div></div>
+<p>This will initialize Vue. It will look for a root element with the ID of “app” to render the views. This is the same as a regular Vue app, but instead of using App.vue page Inertia will use Rails application.html.erb layout page. The Inertia rails adapter will handle creating and adding the ID “app”. The initialPage is looking for a data attribute called page on the root element. Basically this will be where the response from the controller is stored. The next item to point out is the resolveComponent, it will look at the Pages directory for the views. Create the Pages folder in the app/javascript folder. You can change the location of the folder just be sure update the resolveComponent require path. We will be adding the Notes views later.</p>
+
+<h3 id="add-inertia"><strong>Add Inertia</strong></h3>
+<p>Time for some Inertia. At this point our app is broken because we are trying to Import Inertia on the client side, which we have not added. We can start with adding Inertia the client-side. In your terminal run.
+<code class="highlighter-rouge">yarn add @inertiajs/inertia @inertiajs/inertia-vue @inertiajs/progress</code>
+This will add Inertia, Inertia-vue, and progress bar libraries to our package.json. Inertia has an optional progress bar library that will show as a loading indicator. We need to add the following to application.js under the other imports. This will initialize the progress bar.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/packs/application.js</span>
+<span class="p">...</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">InertiaProgress</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@inertiajs/progress</span><span class="dl">'</span>
+<span class="nx">InertiaProgress</span><span class="p">.</span><span class="nx">init</span><span class="p">()</span>
+</code></pre></div></div>
+<p>Next up is setting up the server side. Add the Inertia gem by running the command in the terminal.
+<code class="highlighter-rouge">bundle add 'inertia_rails'</code>
+This will add the latest version of the gem to the Gemfile and install. We have to change the application.html.erb and update the javascript_pack_tag to add defer: true.
+<code class="highlighter-rouge">&lt;%= javascript_pack_tag 'application', defer: true %&gt;</code>
+This will cause the script to be executed after the page has been parsed. If this is not added then it may will show a blank page with error an Error in render: “TypeError: Cannot read property ‘dataset’ of null”. Not fun to debug. Note, the following this is optional, but you can make some configuration changes to Inertia by using an initializer. Create a inertia_rails.rb file and add the following code.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/inertia_rails.rb</span>
+<span class="no">InertiaRails</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span> <span class="n">config</span> <span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">version</span> <span class="o">=</span> <span class="s1">'1.0'</span> <span class="c1"># used for asset verioning</span>
+  <span class="c1"># config.layout = 'some_other_file' # use this to change the default layout file that inertia will use. Default it uses application.html.erb.</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>If you do add/update this initializer remember to restart the rails server.</p>
+
+<h3 id="add-tailwindcss"><strong>Add Tailwindcss</strong></h3>
+<p>This step is optional, but I will be adding Tailwindcss to my project to for styling. Open your terminal run the commands.
+<code class="highlighter-rouge">yarn add tailwindcss</code>
+<code class="highlighter-rouge">npx tailwindcss init --full</code>
+The first will add tailwind to the project and the second will scaffold a tailwind.config.js file. The tailwind.config.js file is used to customize your style theme. With the flag –full it will add all of Tailwind defaults, but you can make any changes you want to the theme. Next we need to add Tailwind to the postcss.config.js file.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// postcss.config.js</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">plugins</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">...</span>
+    <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">tailwindcss</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">autoprefixer</span><span class="dl">'</span><span class="p">),</span>
+    <span class="p">...</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>Create a stylesheets folder under app/javascript folder. Then create an application.scss file in the app/javascript/stylesheets folder. Open application.scss and add the following lines.</p>
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/stylesheets/application.scss</span>
+<span class="k">@import</span> <span class="s2">"tailwindcss/base"</span><span class="p">;</span>
+<span class="k">@import</span> <span class="s2">"tailwindcss/components"</span><span class="p">;</span>
+<span class="k">@import</span> <span class="s2">"tailwindcss/utilities"</span><span class="p">;</span>
+</code></pre></div></div>
+<p>Open application.js and add the following line.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/packs/application.js</span>
+<span class="p">...</span>
+<span class="k">import</span> <span class="dl">"</span><span class="s2">stylesheets/application</span><span class="dl">"</span>
+</code></pre></div></div>
+<p>One last update, open application.html.erb and change the following lines so that the views can use the stylesheets in the app/javascript/stylesheets folder. I also added some Tailwind classes to the body. Note, moving forward all classes will be Tailwind unless otherwise specified.</p>
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/layouts/application.html.erb
+<span class="nt">&lt;head&gt;</span>
+...
+<span class="c">&lt;%#= stylesheet_link_tag 'application', media: 'all' %&gt;</span> # delete or comment out this link as we will not use the asset pipeline for styles.
+  <span class="cp">&lt;%=</span> <span class="n">stylesheet_pack_tag</span> <span class="s1">'application'</span> <span class="cp">%&gt;</span>
+...
+<span class="nt">&lt;/head&gt;</span>
+  <span class="nt">&lt;body</span> <span class="na">class=</span><span class="s">"container bg-gray-200 mx-auto"</span><span class="nt">&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="k">yield</span> <span class="cp">%&gt;</span>
+  <span class="nt">&lt;/body</span>
+</code></pre></div></div>
+<h3 id="add-home"><strong>Add Home</strong></h3>
+<p>We are going to add a home page to test the inertia render and styles. Add a pages_controller.rb in our app/controllers folder. Open the pages_controller.rb and add the following action.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/pages_controller.rb</span>
+<span class="k">def</span> <span class="nf">home</span>
+  <span class="n">render</span> <span class="ss">inertia: </span><span class="s1">'Home'</span><span class="p">,</span> <span class="ss">props: </span><span class="p">{}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Open routes and add the root path.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/routes.rb</span>
+<span class="n">root</span> <span class="err">'</span><span class="n">pages</span><span class="c1">#home</span>
+</code></pre></div></div>
+<p>Add the Home.vue page to app/javascript/packs/Pages.</p>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// app/javascript/packs/Pages/Home.vue
+<span class="nt">&lt;template&gt;</span>
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;h1</span> <span class="na">class=</span><span class="s">"text-2xl text-center"</span><span class="nt">&gt;</span>Home Page<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/template&gt;</span>
+</code></pre></div></div>
+<p>Restart the rails server and test by going to the localhost:3000 and you should see the text “Home Page”.</p>
+
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/i/blv4h6jovnop49nwqqgu.png" alt="home_page image" /></p>
+
+<h3 id="add-notes"><strong>Add Notes</strong></h3>
+<p>Now that we have Inertia wired up and working we can move on to adding notes. To speed up the tutorial I will use rails scaffolding. We can run the following command in the terminal to scaffold notes.
+<code class="highlighter-rouge">rails g scaffold note title:string content:text</code>
+Run the migrate to create the Note table
+<code class="highlighter-rouge">rails db:migrate</code>
+Restart your server and navigate to localhost:3000/notes and test that you get the new note index page.</p>
+
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/i/hpbdxacjpyx6135dhjzf.png" alt="note_index image" /></p>
+
+<p>You can test by creating a note, and all should work as you would expect. This is nice because rails views and Inertia views are coexisting. So if you have an existing app this allows you to migrate in phases.</p>
+
+<h3 id="note-index"><strong>Note Index</strong></h3>
+<p>We will now migrate over the Note Index to show the vue page. Open notes_controller.rb, and update the index method.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/notes_controller.rb</span>
+<span class="k">def</span> <span class="nf">index</span>
+  <span class="n">notes</span> <span class="o">=</span> <span class="no">Note</span><span class="p">.</span><span class="nf">all</span>
+  <span class="n">render</span> <span class="ss">inertia: </span><span class="s1">'Notes/Index'</span><span class="p">,</span> <span class="ss">props: </span><span class="p">{</span>
+    <span class="ss">notes: </span><span class="n">notes</span><span class="p">.</span><span class="nf">as_json</span><span class="p">(</span><span class="ss">only: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:content</span><span class="p">])</span>
+  <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>The above will retrieve all notes. Next we create Inertia’s render function and pass the location of the Vue page, and props. Props is data that will be passed to our Vue page in json format. The as_json parameter (only: [:id …]) is optional, but recommended because all data passed and is visible to the client-side. Also the more data you pass it could impact performance. Now add a Notes folder to javascript/Pages folder and then add Index.vue to the javascript/Pages/Notes folder. Open the Index.vue file and add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Index.vue</span>
+<span class="err"></span><span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">mt-6</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">h2</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-2xl text-center</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Notes</span><span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">/notes/new</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">New</span> <span class="nx">Note</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">table</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">table-auto bg-white mx-auto w-full mt-4 shadow</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">thead</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">tr</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">th</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Title</span><span class="o">&lt;</span><span class="sr">/th</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="nx">th</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Content</span><span class="o">&lt;</span><span class="sr">/th</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="nx">th</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Action</span><span class="o">&lt;</span><span class="sr">/th</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/tr</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/thead</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">tbody</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">tr</span> <span class="nx">v</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="dl">"</span><span class="s2">note in notes</span><span class="dl">"</span> <span class="p">:</span><span class="nx">key</span><span class="o">=</span><span class="dl">"</span><span class="s2">note.id</span><span class="dl">"</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">td</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="sr">/td</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="nx">td</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="sr">/td</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="nx">td</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Show</span><span class="o">&lt;</span><span class="sr">/td</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/tr</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/tbody</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/table</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">notes</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">Array</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="p">}</span>
+    <span class="p">}</span>  
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>I did not add a link to show the note yet. I will cover it later with Inertia links. Test going to localhost:3000/notes. If you get an error of “uninitialized constant NotesController” you may have to restart server.</p>
+
+<h3 id="note-new"><strong>Note New</strong></h3>
+<p>Next we will migrate the Note new. Open notes_controller.rb, and update both the new and create actions.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/notes_controller.rb</span>
+<span class="o">...</span>
+  <span class="k">def</span> <span class="nf">new</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="no">Note</span><span class="p">.</span><span class="nf">new</span>
+    <span class="n">render</span> <span class="ss">inertia: </span><span class="s1">'Notes/New'</span><span class="p">,</span> <span class="ss">props: </span><span class="p">{</span>
+      <span class="ss">note: </span><span class="n">note</span><span class="p">.</span><span class="nf">as_json</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="vi">@note</span> <span class="o">=</span> <span class="no">Note</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">note_params</span><span class="p">)</span>
+    <span class="k">if</span> <span class="vi">@note</span><span class="p">.</span><span class="nf">save</span>
+      <span class="n">redirect_to</span> <span class="n">notes_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s1">'Note was successfully created.'</span>
+    <span class="k">else</span>
+      <span class="n">redirect_to</span> <span class="n">new_note_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s1">'Note was not created.'</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="o">...</span>
+</code></pre></div></div>
+<p>Add New.vue and Form.vue files to the javascript/Pages/Notes folder. Open the New.vue file and add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// javascript/Pages/Notes/New.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">mt-5</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">h2</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-2xl text-center</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">New</span> <span class="nx">Notes</span><span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">NoteForm</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span> <span class="p">@</span><span class="nd">submit</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span> <span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">NoteForm</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Form</span><span class="dl">'</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">NoteForm</span>
+    <span class="p">},</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">note</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">Object</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nx">data</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="na">form</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">note</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">submit</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// This is in a meta tag located within the head tags</span>
+        <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">meta[name="csrf-token"]</span><span class="dl">'</span><span class="p">).</span><span class="nx">content</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">$inertia</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/notes</span><span class="dl">'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">form</span><span class="p">,</span>
+         <span class="p">{</span>
+          <span class="na">headers</span><span class="p">:</span> <span class="p">{</span> <span class="dl">'</span><span class="s1">X-CSRF-Token</span><span class="dl">'</span><span class="p">:</span> <span class="nx">token</span> <span class="p">}</span>
+         <span class="p">})</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>This is a standard Vue page. The one thing I wanted to point out is the submit function. You will notice that we are using this.$inertia.post to send data to the controller. This is Inertia’s implementation of an ajax request. You will need to get the csrf-token from the head tag of the html page and pass it in the header with request. If you do not pass the the token you will receive an “ActionController::InvalidAuthenticityToken” error. Next open Form.vue and add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// javascript/Pages/Notes/Form.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">form</span> <span class="p">@</span><span class="nd">submit</span><span class="p">.</span><span class="nx">prevent</span><span class="o">=</span><span class="dl">"</span><span class="s2">$emit('submit')</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">rounded-sm bg-white shadow px-8 py-6</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">label</span> <span class="k">for</span><span class="o">=</span><span class="dl">"</span><span class="s2">title</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">block text-gray-700 text-sm font-bold mb-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Title</span><span class="o">&lt;</span><span class="sr">/label</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">text</span><span class="dl">"</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">title</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">form.title</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline</span><span class="dl">"</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="nx">label</span> <span class="k">for</span><span class="o">=</span><span class="dl">"</span><span class="s2">content</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">block text-gray-700 text-sm font-bold mb-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Content</span><span class="p">:</span><span class="o">&lt;</span><span class="sr">/label</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">textarea</span> <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">content</span><span class="dl">"</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">content</span><span class="dl">"</span> <span class="nx">cols</span><span class="o">=</span><span class="dl">"</span><span class="s2">30</span><span class="dl">"</span> <span class="nx">rows</span><span class="o">=</span><span class="dl">"</span><span class="s2">10</span><span class="dl">"</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">form.content</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="sr">/textarea</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Submit</span><span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">/notes</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">button</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">inline-block align-baseline font-bold ml-2 text-sm text-gray-500 hover:text-gray-800</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Cancel</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/form</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">value</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">Object</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="na">computed</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">form</span><span class="p">:</span> <span class="p">{</span>
+        <span class="kd">get</span><span class="p">()</span> <span class="p">{</span>
+          <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span>
+        <span class="p">},</span>
+        <span class="kd">set</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">$emit</span><span class="p">(</span><span class="dl">'</span><span class="s1">input</span><span class="dl">'</span><span class="p">,</span> <span class="nx">val</span><span class="p">)</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>You can test creating a new note. If you get any errors, remember to restart the server. I have found that some errors will only clear up after a restart. One thing to bring up now is Form validation and errors. If you submit an empty title or content it will create a note with empty values. I want my note to require both fields. Open note.rb and add the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/note.rb</span>
+<span class="k">class</span> <span class="nc">Note</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">validates</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+  <span class="n">validates</span> <span class="ss">:content</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Now if you create a note without a title or content, nothing will happen. You stay on the New Note form, and no message appears from the validation errors. We can work on that next. Inertia has a way to share data which we can use to report errors and later flash messages. We will put this code in a concern. Create a file called Inertiable.rb in app/controllers/concerns folder and add the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/concerns/Inertiable.rb</span>
+<span class="nb">require</span> <span class="s1">'active_support/concern'</span>
+
+<span class="k">module</span> <span class="nn">Inertiable</span>
+  <span class="kp">extend</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Concern</span>
+
+  <span class="n">included</span> <span class="k">do</span>
+    <span class="n">inertia_share</span> <span class="ss">errors: </span><span class="o">-&gt;</span> <span class="p">{</span>
+      <span class="n">session</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="ss">:errors</span><span class="p">)</span> <span class="o">||</span> <span class="p">[]</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">redirect_to</span><span class="p">(</span><span class="n">options</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">response_options</span> <span class="o">=</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">errors</span> <span class="o">=</span> <span class="n">response_options</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="ss">:errors</span><span class="p">))</span>
+      <span class="n">session</span><span class="p">[</span><span class="ss">:errors</span><span class="p">]</span> <span class="o">=</span> <span class="n">errors</span>
+    <span class="k">end</span>
+
+    <span class="k">super</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">response_options</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>We create shared data errors that can be accessed in the Vue page. We override the default redirect_to that is used in the controller to store the errors in a session. So that all controllers have access to the new Inertiable.rb add it to the Application controller.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/application_controller.rb</span>
+<span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="kp">include</span> <span class="no">Inertiable</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Next change the note create method to include the error in the redirect_to.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#app/controllers/notes_controller.rb</span>
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="no">Note</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">note_params</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">note</span><span class="p">.</span><span class="nf">save</span>
+      <span class="n">redirect_to</span> <span class="n">notes_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s1">'Note was successfully created.'</span>
+    <span class="k">else</span>
+      <span class="n">redirect_to</span> <span class="n">new_note_path</span><span class="p">,</span> <span class="ss">errors: </span><span class="n">note</span><span class="p">.</span><span class="nf">errors</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>Next create the FlashMessages.vue in app/javascript/Shared folder.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Shared/FlashMessages.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">show</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">Object.keys($page.props.errors).length &gt; 0</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">bg-red-100 border-t-4 border-red-500 rounded-b text-red-900 px-4 py-3 shadow-md</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">alert</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">flex relative</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">py-1</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">svg</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fill-current h-6 w-6 text-red-500 mr-4</span><span class="dl">"</span> <span class="nx">xmlns</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="dl">"</span> <span class="nx">viewBox</span><span class="o">=</span><span class="dl">"</span><span class="s2">0 0 20 20</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">path</span> <span class="nx">d</span><span class="o">=</span><span class="dl">"</span><span class="s2">M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z</span><span class="dl">"</span><span class="o">/&gt;&lt;</span><span class="sr">/svg&gt;&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">p</span> <span class="nx">v</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="dl">"</span><span class="s2">(value, propertyName) in $page.props.errors</span><span class="dl">"</span> <span class="p">:</span><span class="nx">key</span><span class="o">=</span><span class="dl">"</span><span class="s2">propertyName</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">font-bold</span><span class="dl">"</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">button</span> <span class="p">@</span><span class="nd">click</span><span class="o">=</span><span class="dl">"</span><span class="s2">show = false</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">inline absolute top-0 right-0 px-4 py-3 </span><span class="dl">"</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">svg</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fill-current h-6 w-6 text-red-500</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">button</span><span class="dl">"</span> <span class="nx">xmlns</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="dl">"</span> <span class="nx">viewBox</span><span class="o">=</span><span class="dl">"</span><span class="s2">0 0 20 20</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Close</span><span class="o">&lt;</span><span class="sr">/title&gt;&lt;path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/</span><span class="o">&gt;&lt;</span><span class="sr">/svg</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="nx">data</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="na">show</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">capitalize</span><span class="p">(</span><span class="nx">word</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">word</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nx">toUpperCase</span><span class="p">()</span> <span class="o">+</span> <span class="nx">word</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+      <span class="p">},</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>The only thing to note here is that I had to add a method to capitalize the first letter of the Key of the message object. Now we can add the FlashMessages component to the New note page.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/New.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">mt-5</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">FlashMessages</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="nx">h2</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-2xl text-center</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">New</span> <span class="nx">Notes</span><span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">NoteForm</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span> <span class="p">@</span><span class="nd">submit</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span> <span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">FlashMessages</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Shared/FlashMessages</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">NoteForm</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Form</span><span class="dl">'</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">FlashMessages</span><span class="p">,</span>
+      <span class="nx">NoteForm</span>
+    <span class="p">},</span>
+<span class="p">...</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>You may notice that we are using an alias “@” for the path when we import the FlashMessages. We need to make a change to the environment.js file, add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// config/webpack/environment.js</span>
+<span class="p">...</span>
+<span class="kd">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">path</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="nx">environment</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">merge</span><span class="p">({</span>
+  <span class="na">resolve</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">alias</span><span class="p">:</span> <span class="p">{</span>
+      <span class="dl">'</span><span class="s1">@</span><span class="dl">'</span><span class="p">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="dl">'</span><span class="s1">app/javascript</span><span class="dl">'</span><span class="p">),</span>
+      <span class="nx">vue</span><span class="na">$</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vue/dist/vue.runtime.esm.js</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+<span class="p">...</span>
+</code></pre></div></div>
+<p>Now that we have the errors shared data set up, let’s include the regular flash messages. Open the Inertiable.rb file and add the following shared data inside the include do section.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/concerns/Inertiable.rb</span>
+  <span class="n">included</span> <span class="k">do</span>
+    <span class="o">...</span>
+    <span class="n">inertia_share</span> <span class="ss">flash: </span><span class="o">-&gt;</span> <span class="p">{</span>
+      <span class="p">{</span>
+        <span class="ss">notice: </span><span class="n">flash</span><span class="p">.</span><span class="nf">notice</span><span class="p">,</span>
+        <span class="ss">alert: </span><span class="n">flash</span><span class="p">.</span><span class="nf">alert</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>Update the FlashMessage.vue file to show the success and alert messages.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Shared/FlashMessages.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">show</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">$page.props.flash.success</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">alert</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">flex relative</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">py-1</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">svg</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fill-current h-6 w-6 text-teal-500 mr-4</span><span class="dl">"</span> <span class="nx">xmlns</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="dl">"</span> <span class="nx">viewBox</span><span class="o">=</span><span class="dl">"</span><span class="s2">0 0 20 20</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">path</span> <span class="nx">d</span><span class="o">=</span><span class="dl">"</span><span class="s2">M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z</span><span class="dl">"</span><span class="o">/&gt;&lt;</span><span class="sr">/svg&gt;&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">button</span> <span class="p">@</span><span class="nd">click</span><span class="o">=</span><span class="dl">"</span><span class="s2">show = false</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">inline absolute top-0 right-0 px-4 py-3 </span><span class="dl">"</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">svg</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fill-current h-6 w-6 text-teal-500</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">button</span><span class="dl">"</span> <span class="nx">xmlns</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="dl">"</span> <span class="nx">viewBox</span><span class="o">=</span><span class="dl">"</span><span class="s2">0 0 20 20</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Close</span><span class="o">&lt;</span><span class="sr">/title&gt;&lt;path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/</span><span class="o">&gt;&lt;</span><span class="sr">/svg</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">$page.props.flash.alert</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">bg-orange-100 border-t-4 border-orange-500 rounded-b text-orange-900 px-4 py-3 shadow-md</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">alert</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">flex relative</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">py-1</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">svg</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fill-current h-6 w-6 text-orange-500 mr-4</span><span class="dl">"</span> <span class="nx">xmlns</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="dl">"</span> <span class="nx">viewBox</span><span class="o">=</span><span class="dl">"</span><span class="s2">0 0 20 20</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">path</span> <span class="nx">d</span><span class="o">=</span><span class="dl">"</span><span class="s2">M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z</span><span class="dl">"</span><span class="o">/&gt;&lt;</span><span class="sr">/svg&gt;&lt;/</span><span class="nx">div</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">button</span> <span class="p">@</span><span class="nd">click</span><span class="o">=</span><span class="dl">"</span><span class="s2">show = false</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">inline absolute top-0 right-0 px-4 py-3 </span><span class="dl">"</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="nx">svg</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">fill-current h-6 w-6 text-orange-500</span><span class="dl">"</span> <span class="nx">role</span><span class="o">=</span><span class="dl">"</span><span class="s2">button</span><span class="dl">"</span> <span class="nx">xmlns</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="dl">"</span> <span class="nx">viewBox</span><span class="o">=</span><span class="dl">"</span><span class="s2">0 0 20 20</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Close</span><span class="o">&lt;</span><span class="sr">/title&gt;&lt;path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/</span><span class="o">&gt;&lt;</span><span class="sr">/svg</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="p">...</span>
+</code></pre></div></div>
+<p>Then add the FlashMessages.vue component to the Note Index file.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Index.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">mt-6</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">FlashMessages</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="nx">h2</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-2xl text-center</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Notes</span><span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span><span class="p">...</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">FlashMessages</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Shared/FlashMessages</span><span class="dl">'</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">FlashMessages</span>
+    <span class="p">},</span>
+<span class="p">...</span>
+</code></pre></div></div>
+<h3 id="add-menu-and-layout"><strong>Add Menu and Layout</strong></h3>
+<p>Before we move onto the Note Edit I want to work on the navigation and layout for the client-side. The layout is to the client-side what application.html.erb is to the Rails views. It can be used to wrap the Vue page. Create a Layouts folder in the app/javascript folder. Next create a ApplicationLayout.vue file in the Layouts folder. Add the following to the ApplicationLayout.vue.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Layouts/ApplicationLayout.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">main</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">Navigation</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="nx">FlashMessages</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="nx">section</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">container mx-auto</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">slot</span> <span class="o">/&gt;</span>
+    <span class="o">&lt;</span><span class="sr">/section</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/main</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">FlashMessages</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Shared/FlashMessages</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">Navigation</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Shared/Navigation</span><span class="dl">'</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">FlashMessages</span><span class="p">,</span>
+      <span class="nx">Navigation</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>We are going to use a slot which is similar to the &lt;%= yield %&gt; in the application.html.erb. We are importing the FlashMessages, and Navigation components. I removed the FlashMessages component from the pages that I had previously  imported to. Next I will create the Navigation component. Note, remove the classes “container mx-auto” from the body tag of the application.html.erb since we are adding it here. Create a Navigation.vue inapp/javascript/Shared folder. Add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Shared/Navigation.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">nav</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">w-full flex justify-between bg-white py-4 px-8</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">span</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-teal-500 font-bold</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">InertiaApp</span><span class="o">&lt;</span><span class="sr">/span</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">font-medium</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800 mr-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Home</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">/notes</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Notes</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/nav</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>Now we can test out wrapping our Pages with the ApplicationLayout. Open Home.vue and add the following to your script section.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Home.vue</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">Layout</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Layouts/ApplicationLayout</span><span class="dl">'</span> <span class="c1">// add this line</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">layout</span><span class="p">:</span> <span class="nx">Layout</span> <span class="c1">// add this line</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>Add these two layout lines to the Notes Index.vue and New.vue page.</p>
+
+<h3 id="inertia-links"><strong>Inertia Links</strong></h3>
+<p>I want to take another detour to go over links and routes. Inertia has its own links that are called inertia-link. It is a wrapper around an anchor tag that prevents full page reloads. What I want to discuss is the href. You can use basic string path such as href=”/notes” which will navigate to the Notes Index. What if we want to use named routes like we do on the sever-side, or edit a certain note by passing in the id such as :href=”$route.edit_note(note.id)”. Well, we can, by using gem called JsRoutes. We will use this gem to read the routes.rb file and generate a routes.js file that we can use on the client-side. Open your terminal and run.
+<code class="highlighter-rouge">bundle add "js-routes" --group "development"</code>
+This will install the js-routes gem. Next we need to create jsroutes.rb in the config/initializers folder. Add the following to the file.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/jsroutes.rb</span>
+<span class="no">JsRoutes</span><span class="p">.</span><span class="nf">setup</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="sr">/rails_/</span><span class="p">]</span> <span class="c1"># excludes rails generated routes</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">compact</span> <span class="o">=</span> <span class="kp">true</span>       <span class="c1"># removes the _path from the route name</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="s2">"app/javascript/packs"</span>
+  <span class="no">JsRoutes</span><span class="p">.</span><span class="nf">generate!</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">/routes.js"</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>The will help to automatically generate the routes.js file when we start the server. Now when you add a new route to the routes.rb file and you restart the server the route will be added to the new routes.js file. The next thing is to add the routes to the top level of our client-side application so we can have access across the application. Open the application.js file and add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/packs/application.js</span>
+<span class="p">...</span>
+<span class="k">import</span> <span class="nx">Routes</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./routes.js</span><span class="dl">"</span> <span class="c1">// add this line</span>
+<span class="nx">Vue</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">$routes</span> <span class="o">=</span> <span class="nx">Routes</span> <span class="c1">// add this line</span>
+
+<span class="kd">const</span> <span class="nx">el</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">app</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">...</span>
+</code></pre></div></div>
+<p>Now we can test this out by updating the Note Index.vue page to add the inertia-link to each note. Open the Index.vue page in app/javascript/Pages/Notes folder and make the following change.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Index.vue</span>
+<span class="p">...</span>
+<span class="o">&lt;</span><span class="nx">td</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.note(note.id)</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Show</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/td</span><span class="err">&gt;
+</span><span class="p">...</span>
+</code></pre></div></div>
+<p>After you refresh the index page you can hover over the notes Show link and see that in the lower left corner the URL. Example you should see something like <code class="highlighter-rouge">localhost:3000/notes/2</code> where the 2 is the id of the note. If you click on the Show link you will get this odd looking modal window that has the note show page. This is really an Inertia error window. It is happening because we are sending an Inertia request to the server-side, but we don’t have an Inertia view for the show page. Which we can easily fix now and then move on to the Note Edit. Open the notes_controller.rb and update the Show action with the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/notes_controller.rb</span>
+  <span class="k">def</span> <span class="nf">show</span>
+    <span class="n">render</span> <span class="ss">inertia: </span><span class="s1">'Notes/Show'</span><span class="p">,</span> <span class="ss">props: </span><span class="p">{</span>
+      <span class="ss">note: </span><span class="vi">@note</span><span class="p">.</span><span class="nf">as_json</span><span class="p">(</span><span class="ss">only: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:content</span><span class="p">])</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>Next add a Show.vue file to app/javascript/Pages/Notes folder. Add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Show.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">mt-6</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">h2</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-2xl text-center</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">article</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">rounded-sm bg-white shadow px-8 py-6 my-4</span><span class="dl">"</span><span class="o">&gt;</span>
+      
+    <span class="o">&lt;</span><span class="sr">/article</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">Layout</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Layouts/ApplicationLayout</span><span class="dl">'</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">note</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">Object</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="na">layout</span><span class="p">:</span> <span class="nx">Layout</span><span class="p">,</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>Now when you click on the Show link it will navigate to the Note Show.vue page.</p>
+
+<h3 id="note-edit"><strong>Note Edit</strong></h3>
+<p>On to the Note Edit. Open the notes_controller.rb and update the Edit and Update actions with the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/notes_controller.rb</span>
+  <span class="k">def</span> <span class="nf">edit</span>
+    <span class="n">render</span> <span class="ss">inertia: </span><span class="s1">'Notes/Edit'</span><span class="p">,</span> <span class="ss">props: </span><span class="p">{</span>
+      <span class="ss">note: </span><span class="vi">@note</span><span class="p">.</span><span class="nf">as_json</span><span class="p">(</span><span class="ss">only: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:content</span><span class="p">])</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+  <span class="o">...</span>
+  <span class="k">def</span> <span class="nf">update</span>
+    <span class="k">if</span> <span class="vi">@note</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">note_params</span><span class="p">)</span>
+      <span class="n">redirect_to</span> <span class="n">notes_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s1">'Note was successfully update.'</span>
+    <span class="k">else</span>
+      <span class="n">redirect_to</span> <span class="n">edit_note_path</span><span class="p">(</span><span class="vi">@note</span><span class="p">),</span> <span class="ss">errors: </span><span class="vi">@note</span><span class="p">.</span><span class="nf">errors</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>Now we need to create the Edit.vue. Add the Edit.vue page in the app/javascript/Pages/Notes folder. Add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Edit.vue</span>
+<span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">mt-5</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">h2</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-2xl text-center</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Edit</span> <span class="nx">Note</span><span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">NoteForm</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span> <span class="p">@</span><span class="nd">submit</span><span class="o">=</span><span class="dl">"</span><span class="s2">submit</span><span class="dl">"</span> <span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="sr">/template</span><span class="err">&gt;
+</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nx">NoteForm</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Form</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">Layout</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/Layouts/ApplicationLayout</span><span class="dl">'</span>
+  <span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="na">components</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">NoteForm</span>
+    <span class="p">},</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">note</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">Object</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="na">layout</span><span class="p">:</span> <span class="nx">Layout</span><span class="p">,</span>
+    <span class="nx">data</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="na">form</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">note</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="na">methods</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">submit</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">$inertia</span><span class="p">.</span><span class="nx">put</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">$routes</span><span class="p">.</span><span class="nx">note</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">note</span><span class="p">.</span><span class="nx">id</span><span class="p">),</span> <span class="k">this</span><span class="p">.</span><span class="nx">form</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p>You will notice this is basically the same as the New.vue with the exception of the submit function. I am using this.$inertia.put instead of post. I removed the headers CSRF token. You can also remove the CSRF token code from the New.vue submit. Since this will be needed on each request we can make a couple of changes so that it is. Open application.js and add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/packs/application.js</span>
+<span class="k">import</span> <span class="nx">axios</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">axios</span><span class="dl">'</span>
+<span class="nx">axios</span><span class="p">.</span><span class="nx">defaults</span><span class="p">.</span><span class="nx">xsrfHeaderName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">X-CSRF-Token</span><span class="dl">"</span>
+</code></pre></div></div>
+<p>Next open the Inertiable.rb and add the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/concerns/Inertiable.rb</span>
+  <span class="n">included</span> <span class="k">do</span>
+    <span class="n">before_action</span> <span class="ss">:set_csrf_cookies</span>
+    <span class="o">...</span>
+  <span class="k">end</span>
+  <span class="o">...</span>
+  <span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">set_csrf_cookies</span>
+    <span class="n">cookies</span><span class="p">[</span><span class="s1">'XSRF-TOKEN'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="ss">value: </span><span class="n">form_authenticity_token</span><span class="p">,</span>
+      <span class="ss">same_site: </span><span class="s1">'Strict'</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>I made an update the Notes Index.vue page to include an edit link for the note. Add the following under the Show link.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Index.vue</span>
+<span class="p">...</span>
+<span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.edit_note(note.id)</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Edit</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span><span class="p">...</span>
+</code></pre></div></div>
+
+<h3 id="note-delete"><strong>Note Delete</strong></h3>
+<p>The last CRUD action to work on is the delete. Open notes_controller.rb and update the delete action with the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/notes_controller.rb</span>
+  <span class="k">def</span> <span class="nf">destroy</span>
+    <span class="vi">@note</span><span class="p">.</span><span class="nf">destroy</span>
+    <span class="n">redirect_to</span> <span class="n">notes_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s1">'Note was successfully destroyed.'</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>Next add a link to the Notes Index.vue page to delete the note. Open the Index page and add the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Pages/Notes/Index.vue</span>
+<span class="p">...</span>
+          <span class="o">&lt;</span><span class="nx">td</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">border px-4 py-2</span><span class="dl">"</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.note(note.id)</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-blue-700 mr-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Show</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.edit_note(note.id)</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-green-700 mr-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Edit</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span> <span class="p">@</span><span class="nd">click</span><span class="o">=</span><span class="dl">"</span><span class="s2">onDelete(note.id)</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-red-700</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Delete</span><span class="o">&lt;</span><span class="sr">/a&gt; &lt;!-- add this link --</span><span class="err">&gt;
+</span>          <span class="o">&lt;</span><span class="sr">/td</span><span class="err">&gt;
+</span><span class="p">...</span>
+<span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+<span class="p">...</span>
+    <span class="nx">methods</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nx">onDelete</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">$inertia</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">$routes</span><span class="p">.</span><span class="nx">note</span><span class="p">(</span><span class="nx">id</span><span class="p">),</span> <span class="p">{</span>
+          <span class="na">onBefore</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">confirm</span><span class="p">(</span><span class="dl">'</span><span class="s1">Are you sure you want to delete this note?</span><span class="dl">'</span><span class="p">),</span>
+        <span class="p">})</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/i/50d93189vngyrddhnhe2.png" alt="updated_index image" /></p>
+
+<h3 id="add-devise"><strong>Add Devise</strong></h3>
+<p>Using devise in this app will be pretty standard setup and configuration. I am adding as an extra, but also to point out a couple of items that may help you when using it with Inertia. I will run through the basics setup. Open terminal and run the following commands.
+<code class="highlighter-rouge">bundle add 'devise'</code>
+<code class="highlighter-rouge">rails generate devise:install</code>
+<code class="highlighter-rouge">rails g devise:views</code>
+<code class="highlighter-rouge">rails generate devise User</code>
+<code class="highlighter-rouge">rails db:migrate</code>
+<code class="highlighter-rouge">rails g migration add_user_id_to_notes user_id:integer</code>
+<code class="highlighter-rouge">rails db:migrate</code>
+Add the associations to the Note and User models.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/user.rb</span>
+<span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="o">...</span>
+  <span class="n">has_many</span> <span class="ss">:notes</span><span class="p">,</span> <span class="ss">dependent: :destroy</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/note.rb</span>
+<span class="k">class</span> <span class="nc">Note</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">belongs_to</span> <span class="ss">:user</span>
+  <span class="o">...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Update the notes_controller.rb to only allow the current user to manage their notes.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/notes_controller.rb</span>
+<span class="k">class</span> <span class="nc">NotesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="n">before_action</span> <span class="ss">:authenticate_user!</span>
+  <span class="o">...</span>
+
+  <span class="k">def</span> <span class="nf">index</span>
+    <span class="n">notes</span> <span class="o">=</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">notes</span><span class="p">.</span><span class="nf">all</span>
+    <span class="n">render</span> <span class="ss">inertia: </span><span class="s1">'Notes/Index'</span><span class="p">,</span> <span class="ss">props: </span><span class="p">{</span>
+      <span class="ss">notes: </span><span class="n">notes</span><span class="p">.</span><span class="nf">as_json</span><span class="p">(</span><span class="ss">only: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:content</span><span class="p">])</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+  <span class="o">...</span>
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">notes</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">note_params</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">note</span><span class="p">.</span><span class="nf">save</span>
+      <span class="n">redirect_to</span> <span class="n">notes_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s1">'Note was successfully created.'</span>
+    <span class="k">else</span>
+      <span class="n">redirect_to</span> <span class="n">new_note_path</span><span class="p">,</span> <span class="ss">errors: </span><span class="n">note</span><span class="p">.</span><span class="nf">errors</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  <span class="o">...</span>
+  <span class="kp">private</span>
+
+    <span class="k">def</span> <span class="nf">set_note</span>
+      <span class="vi">@note</span> <span class="o">=</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">notes</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+    <span class="k">end</span>
+    <span class="o">...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Note, I updated the devise views with the Tailwind css, but not going to add the changes here. Please see the repo for the changes. Next we will want to share the current users information with the client-side so we will update the Inertiable.rb file with the following.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/concerns/Inertiable.rb</span>
+  <span class="n">included</span> <span class="k">do</span>
+    <span class="o">...</span>
+    <span class="n">inertia_share</span> <span class="ss">auth: </span><span class="o">-&gt;</span> <span class="p">{</span>
+      <span class="p">{</span>
+        <span class="ss">user: </span><span class="n">current_user</span><span class="p">.</span><span class="nf">as_json</span><span class="p">(</span><span class="ss">only: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:email</span><span class="p">])</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>This will share the current users id and email. Next we can update the Navigation.vue file with the following.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/Shared/Navigation.vue</span>
+<span class="p">...</span>
+    <span class="o">&lt;</span><span class="nx">div</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">font-medium flex</span><span class="dl">"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800 px-2 mr-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Home</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">span</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="dl">"</span><span class="s2">!$page.props.auth.user</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">a</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.new_user_session()</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800 px-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Sign</span> <span class="nx">In</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">a</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.new_user_registration()</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800 px-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Sign</span> <span class="nx">Up</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/span</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">span</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">/notes</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800 px-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Notes</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">inertia</span><span class="o">-</span><span class="nx">link</span> <span class="p">:</span><span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">$routes.destroy_user_session()</span><span class="dl">"</span> <span class="nx">method</span><span class="o">=</span><span class="dl">"</span><span class="s2">delete</span><span class="dl">"</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">text-gray-600 hover:text-gray-800 px-2</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Sign</span> <span class="nx">Out</span><span class="o">&lt;</span><span class="sr">/inertia-link</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="sr">/span</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span><span class="p">...</span>
+</code></pre></div></div>
+<p>I am showing the different links based on if there is a current user stored in the “auth.user” shared data that we added in Inertiable.rb. We use anchor tags for both Sign in and Sign up because we are using rails views. We can use the inertia-link for the Sign out because there is no associated rails view.</p>
+
+<p>I will not be migrating the devise views to client-side just show how you can have both client-side views and rails views. If you decide to migrate to the client-side, you will need to make your own sessions and registrations controllers to override the actions such as create, destroy and edit for registration with an Inertia render. One more note on devise if you use turbolinks you will run into an issue after submitting the sign up or sign in. The only way I have found to make it work is to override the sessions and registrations controllers and disable the turbolinks on the redirect_to. For example the sign in, I created the sessions controller and then added the following to the create action.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="nf">create</span>
+   <span class="nb">self</span><span class="p">.</span><span class="nf">resource</span> <span class="o">=</span> <span class="n">warden</span><span class="p">.</span><span class="nf">authenticate!</span><span class="p">(</span><span class="n">auth_options</span><span class="p">)</span>
+   <span class="n">set_flash_message!</span><span class="p">(</span><span class="ss">:notice</span><span class="p">,</span> <span class="ss">:signed_in</span><span class="p">)</span>
+   <span class="n">sign_in</span><span class="p">(</span><span class="n">resource_name</span><span class="p">,</span> <span class="n">resource</span><span class="p">)</span>
+   <span class="n">redirect_to</span> <span class="n">root_path</span><span class="p">,</span> <span class="ss">turbolinks: </span><span class="kp">false</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<p>The first three lines I copied from the device code, and then updated the redirect_to to add “turbolinks: false”. Not ideal, but it worked.</p>
+
+<h3 id="closing-thoughtssummary"><strong>Closing Thoughts/Summary</strong></h3>
+<p>Inertia is a great project, and I covered the basics. I would encourage you to look over the Inertia documentation for more advance topics. Give it a try and let me know what you think. I want to thank <a href="https://twitter.com/ledermann">Georg Ledermann</a> for porting over the Inertia <a href="https://github.com/ledermann/pingcrm">demo app to Rails</a>, and so being helpful in answering my questions. If you have any questions please leave a comment and I will do my best to answer.</p>
+
+    </div>
+  </section>
+</article>
+
+
+    </main>
+
+    <footer class="footer footer-center p-10 bg-gray-600 text-white rounded">
+  <div class="grid grid-flow-col gap-4">
+    <a class="link link-hover">About</a> 
+    <a class="link link-hover">Post</a> 
+    <a class="link link-hover">Projects</a> 
+  </div> 
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <span>
+        <a href="https://github.com/jamgar">GitHub</a>
+      </span>
+    </div>
+  </div> 
+  <div>
+    <p>Copyright © 2022 - All right reserved by James Garcia</p>
+  </div>
+</footer>
+
+  </body>
+</html>

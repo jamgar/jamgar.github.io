@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="James Garcia" />
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>How to use Editor.js in Rails 7 | James Garcia</title>
+
+<meta name="description" content="James Garcia - Web developer" />
+
+<link rel="stylesheet" href="/_bridgetown/static/css/main.c4aa4b876deed32762e8.css" />
+<script src="/_bridgetown/static/js/main.3e63050e6041267a18e4.js" defer></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  </head>
+  <body class="post ">
+    <div class="navbar bg-amber-300 font-medium">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+        <li>
+          <a class="navbar-item" href="/">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/about">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/posts">
+            Posts
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/projects">
+            Projects
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/about">
+          About
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/posts">
+          Posts
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/projects">
+          Projects
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end"></div>
+</div>
+
+
+    <main>
+      <article class="mt-20 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  How to use Editor.js in Rails 7
+  </h1>
+
+  <section class="md:px-0 px-4">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-900 ">
+          James Garcia
+        </div>
+      <div class="text-base font-light text-gray-500">
+        2023-04-13 20:05:48 UTC
+      </div>
+
+    </div>
+    <div class="">
+      <p><img src="/images/editorjs-hero.png" alt="editor JS hero" /></p>
+
+<p>In this article I will step through adding <a href="https://editorjs.io/">Editor.Js</a> to a Rails 7 app. Lets start with creating the Rails app.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rails</span> <span class="n">new</span> <span class="n">editor</span><span class="o">-</span><span class="n">js</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">javascript</span><span class="o">=</span><span class="n">esbuild</span>
+</code></pre></div></div>
+
+<p>So we have a resource to work with let’s scaffold Articles.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rails</span> <span class="n">generate</span> <span class="n">scaffold</span> <span class="n">article</span> <span class="n">title</span> <span class="n">body</span><span class="ss">:json</span>
+</code></pre></div></div>
+
+<p>Now open the migration <code class="highlighter-rouge">&lt;timestamp&gt;_create_articles.rb</code>, and update the body to have a default value of “{}”.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">class</span> <span class="nc">CreateArticles</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span><span class="p">[</span><span class="mf">7.0</span><span class="p">]</span>
+  <span class="k">def</span> <span class="nf">change</span>
+    <span class="n">create_table</span> <span class="ss">:articles</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">string</span> <span class="ss">:title</span>
+      <span class="n">t</span><span class="p">.</span><span class="nf">json</span> <span class="ss">:body</span><span class="p">,</span> <span class="ss">default: </span><span class="p">{}</span> <span class="c1"># &lt;= update this line</span>
+
+      <span class="n">t</span><span class="p">.</span><span class="nf">timestamps</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>Save and then run <code class="highlighter-rouge">rails db:migrate</code> to create the table.</p>
+
+<p>Next we will add the Editor.js and some Block tools. If you only add the Editor.js it will come with a default Text (a.k.a. paragraph) tool. With the extra ones you will have the option for a Header and Text tool with alignment options. In the terminal run:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yarn add @editorjs/editorjs @editorjs/header editorjs-paragraph-with-alignment@3.x
+</code></pre></div></div>
+
+<p>To connect the editor to our articles we will use a Stimulus controller. Lets create the controller. In the terminal run:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate stimulus editor
+</code></pre></div></div>
+
+<p>This create the <code class="highlighter-rouge">editor_controller.js</code> in the <code class="highlighter-rouge">app/javascript/controllers</code> folder and update the <code class="highlighter-rouge">index.js</code> in the same folder to register the controller. Open the <code class="highlighter-rouge">editor_controller.js</code> and overwrite the code with the following:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Controller</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@hotwired/stimulus</span><span class="dl">"</span>
+<span class="k">import</span> <span class="nx">EditorJS</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@editorjs/editorjs</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Paragraph</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">editorjs-paragraph-with-alignment</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Header</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@editorjs/header</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="kd">extends</span> <span class="nx">Controller</span> <span class="p">{</span>
+  <span class="kd">static</span> <span class="nx">targets</span> <span class="o">=</span> <span class="p">[</span> <span class="dl">"</span><span class="s2">body</span><span class="dl">"</span> <span class="p">]</span>
+  <span class="kd">static</span> <span class="nx">values</span> <span class="o">=</span> <span class="p">{</span> 
+    <span class="na">readonly</span><span class="p">:</span> <span class="nb">Boolean</span><span class="p">,</span>
+    <span class="na">editordata</span><span class="p">:</span> <span class="nb">String</span> 
+  <span class="p">}</span>
+
+  <span class="nx">connect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">body</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">editordataValue</span> <span class="p">?</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">editordataValue</span><span class="p">)</span> <span class="p">:</span> <span class="p">{}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">editor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EditorJS</span><span class="p">({</span>
+      <span class="na">holder</span><span class="p">:</span> <span class="dl">'</span><span class="s1">editorjs</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">tools</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">paragraph</span><span class="p">:</span> <span class="p">{</span> 
+          <span class="na">class</span><span class="p">:</span> <span class="nx">Paragraph</span><span class="p">,</span>
+          <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">placeholder</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Enter text</span><span class="dl">'</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="na">header</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">class</span><span class="p">:</span> <span class="nx">Header</span><span class="p">,</span>
+          <span class="na">shortcut</span><span class="p">:</span> <span class="dl">'</span><span class="s1">CMD+SHIFT+H</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">placeholder</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Enter a header</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">levels</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>
+            <span class="na">default</span><span class="p">:</span> <span class="mi">3</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+      <span class="p">},</span>
+      <span class="na">readOnly</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">readonlyValue</span><span class="p">,</span>
+      <span class="na">data</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
+      <span class="na">onChange</span><span class="p">:</span> <span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="nx">content</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">editor</span><span class="p">.</span><span class="nx">saver</span><span class="p">.</span><span class="nx">save</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">bodyTarget</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">content</span><span class="p">)</span>
+      <span class="p">},</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">disconnect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">editor</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">editor</span> <span class="o">=</span> <span class="kc">null</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>The following will import the packages we added through yarn</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">EditorJS</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@editorjs/editorjs</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Paragraph</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">editorjs-paragraph-with-alignment</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Header</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@editorjs/header</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The following will are Stimulus data attributes that you can reference. In are case we will be targeting a data attribute called “body” to put information and getting values from data attributes called “readonly” and “editordata”. We will be using these in the views and the Connect function in this same controller.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">static</span> <span class="nx">targets</span> <span class="o">=</span> <span class="p">[</span> <span class="dl">"</span><span class="s2">body</span><span class="dl">"</span> <span class="p">]</span>
+  <span class="kd">static</span> <span class="nx">values</span> <span class="o">=</span> <span class="p">{</span> 
+    <span class="na">readonly</span><span class="p">:</span> <span class="nb">Boolean</span><span class="p">,</span>
+    <span class="na">editordata</span><span class="p">:</span> <span class="nb">String</span> 
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>The connect function is main part. Here we instantiate and configure the editor.js. First we are setting variable body to the value of <code class="highlighter-rouge">editordata</code> or and empty object <code class="highlighter-rouge">{}</code> this is based on the condition if this is a new article or an existing article. With a new article the <code class="highlighter-rouge">editordata</code> will not have any value. This body variable will set the <code class="highlighter-rouge">data</code> attribute in the editor configuration.</p>
+
+<p>The next item is the configuration of the editor. Holder is the id of the HTML attributes where the editorjs will be added. Tools are were we configure the Text, Header or whatever Block tool you bring in. In this case it is just those two.</p>
+
+<p>With the latest version of editor.js you can set the editor to be ReadOnly. I am using this in the show.html.erb page, which we will see later.</p>
+
+<p>Lastly we see the onChange function this is called everytime a value is update in the editor. What is happening is here is that the save function is called on the values of the editor on each change. This will this insert the content into a hidden field in the form that will later be submitted and saved to the database. I could have made the submit to do a fetch POST call, but there was some unexpected behavior when I attempted this, which was basically it would cause an error of too many redirects. So came up with this implementation and stayed closer to what is already built into the rails forms. Also, if I recall correctly other WYSYWIG editors do the same with a hidden field.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">connect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">body</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">editordataValue</span> <span class="p">?</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">editordataValue</span><span class="p">)</span> <span class="p">:</span> <span class="p">{}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">editor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EditorJS</span><span class="p">({</span>
+      <span class="na">holder</span><span class="p">:</span> <span class="dl">'</span><span class="s1">editorjs</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">tools</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">paragraph</span><span class="p">:</span> <span class="p">{</span> 
+          <span class="na">class</span><span class="p">:</span> <span class="nx">Paragraph</span><span class="p">,</span>
+          <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">placeholder</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Enter text</span><span class="dl">'</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="na">header</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">class</span><span class="p">:</span> <span class="nx">Header</span><span class="p">,</span>
+          <span class="na">shortcut</span><span class="p">:</span> <span class="dl">'</span><span class="s1">CMD+SHIFT+H</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">config</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">placeholder</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Enter a header</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">levels</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>
+            <span class="na">default</span><span class="p">:</span> <span class="mi">3</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+      <span class="p">},</span>
+      <span class="na">readOnly</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">readonlyValue</span><span class="p">,</span>
+      <span class="na">data</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
+      <span class="na">onChange</span><span class="p">:</span> <span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="nx">content</span> <span class="o">=</span> <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">editor</span><span class="p">.</span><span class="nx">saver</span><span class="p">.</span><span class="nx">save</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">bodyTarget</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">content</span><span class="p">)</span>
+      <span class="p">},</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>The disconnect function is just to do some clean up of the editor.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">disconnect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">editor</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">editor</span> <span class="o">=</span> <span class="kc">null</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Next we can update the views. Open the Articles new.html.erb file and update the following. This will connect the <code class="highlighter-rouge">editor_controller.js</code>, and will provide the editordata value.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">data-controller=</span><span class="s">"editor"</span>
+      <span class="na">data-editor-editordata-value=</span><span class="s">{}</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>New article<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">render</span> <span class="err">'</span><span class="na">form</span><span class="err">',</span> <span class="na">article:</span> <span class="err">@</span><span class="na">article</span> <span class="err">%</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">link_to</span> <span class="err">"</span><span class="na">Back</span> <span class="na">to</span> <span class="na">articles</span><span class="err">",</span> <span class="na">articles_path</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+
+</code></pre></div></div>
+
+<p>The edit.html.erb is very similar except we pass in the existing body value into the editordata.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">data-controller=</span><span class="s">"editor"</span> 
+      <span class="na">data-editor-editordata-value=</span><span class="s">"&lt;%= @article.body %&gt;"</span>
+      <span class="na">data-editor-id-value=</span><span class="s">"&lt;%= @article.id %&gt;"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>Edit article<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">render</span> <span class="err">'</span><span class="na">form</span><span class="err">',</span> <span class="na">article:</span> <span class="err">@</span><span class="na">article</span> <span class="err">%</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">link_to</span> <span class="err">"</span><span class="na">Back</span> <span class="na">to</span> <span class="na">articles</span><span class="err">",</span> <span class="na">articles_path</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>We need to update the form.html.erb partial. Here we are adding a div with an id with editorjs. Then adding the hidden field of body with the body data attribute. It will be updated when the editorjs changes.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form_with</span><span class="err">(</span><span class="na">model:</span> <span class="na">article</span><span class="err">)</span> <span class="na">do</span> <span class="err">|</span><span class="na">form</span><span class="err">|</span> <span class="err">%</span><span class="nt">&gt;</span>
+  ...
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"editorjs"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form.hidden_field</span> <span class="na">:body</span><span class="err">,</span> <span class="na">data:</span> <span class="err">{</span> <span class="na">editor_target:</span> <span class="err">"</span><span class="na">body</span><span class="err">"</span> <span class="err">}</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  ...
+<span class="nt">&lt;</span><span class="err">%</span> <span class="na">end</span> <span class="err">%</span><span class="nt">&gt;</span>
+
+</code></pre></div></div>
+
+<p>Lastly we will update the show.html.erb. The key item here is the data attribute of readonly set to true. This will have the editor change to read only mode and so no updates can be made. There are some ruby gems that can be used for this, but now that the attribute has been added to the latest version of editorjs we can just use this to render the body.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">data-controller=</span><span class="s">"editor"</span> 
+      <span class="na">data-editor-readonly-value=</span><span class="s">true</span>
+      <span class="na">data-editor-editordata-value=</span><span class="s">"&lt;%= @article.body %&gt;"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">render</span> <span class="err">@</span><span class="na">article</span> <span class="err">%</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+...
+</code></pre></div></div>
+
+
+    </div>
+  </section>
+</article>
+
+
+    </main>
+
+    <footer class="footer footer-center p-10 bg-gray-600 text-white rounded">
+  <div class="grid grid-flow-col gap-4">
+    <a class="link link-hover">About</a> 
+    <a class="link link-hover">Post</a> 
+    <a class="link link-hover">Projects</a> 
+  </div> 
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <span>
+        <a href="https://github.com/jamgar">GitHub</a>
+      </span>
+    </div>
+  </div> 
+  <div>
+    <p>Copyright © 2022 - All right reserved by James Garcia</p>
+  </div>
+</footer>
+
+  </body>
+</html>

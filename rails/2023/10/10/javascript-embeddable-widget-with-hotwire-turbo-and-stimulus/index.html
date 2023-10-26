@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" title="James Garcia" />
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Javascript embeddable widget with Hotwire Turbo and Stimulus | James Garcia</title>
+
+<meta name="description" content="James Garcia - Web developer" />
+
+<link rel="stylesheet" href="/_bridgetown/static/css/main.c4aa4b876deed32762e8.css" />
+<script src="/_bridgetown/static/js/main.3e63050e6041267a18e4.js" defer></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  </head>
+  <body class="post ">
+    <div class="navbar bg-amber-300 font-medium">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+        <li>
+          <a class="navbar-item" href="/">
+            Home
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/about">
+            About
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/posts">
+            Posts
+          </a>
+        </li>
+        <li>
+          <a class="navbar-item" href="/projects">
+            Projects
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/about">
+          About
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/posts">
+          Posts
+        </a>
+      </li>
+      <li>
+        <a class="navbar-item" href="/projects">
+          Projects
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end"></div>
+</div>
+
+
+    <main>
+      <article class="mt-20 mx-auto w-full max-w-2xl prose lg:prose-xl">
+  <h1 class="my-8 text-center text-4xl font-bold text-gray-800 tracking-tight leading-none md:text-5xl xl:text-6xl">
+  Javascript embeddable widget with Hotwire Turbo and Stimulus
+  </h1>
+
+  <section class="md:px-0 px-4">
+    <div class="mb-4">
+        <div class="text-xl font-bold text-gray-900 ">
+          James Garcia
+        </div>
+      <div class="text-base font-light text-gray-500">
+        2023-10-10 23:42:59 UTC
+      </div>
+
+    </div>
+    <div class="">
+      <p>There are many articles on how to create an embeddable widget with Javascript, but I wanted to see if I could do the same with just Hotwire Turbo and Stimulus. “Why?” you might ask. Easy, because I like the struggle 😵‍💫. Seriously, I like Rails and really enjoy using Turbo (Turbo Streams / Turbo Frames) so I wanted to see how this experiment would go.</p>
+
+<p>The objective was to create a Javascript widget that I could embed in an external website that uses Turbo Frame and Turbo Stream instead of a JavaScript framework/library like Vue or React. The following is what I came up with.</p>
+
+<p>I created a new rails project, and used esbuild. I would need to still use JavaScript for some of it as you will see shortly.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># ruby 3.2.2
+# rails 7.0.8
+rails new turbo_widget --javascript=esbuild
+</code></pre></div></div>
+
+<p>The widget is an “email catcher”. For example if someone wanted to start collecting emails for a new product or newletter interest they could embed this widget on there website and the emails would be saved to the rails app for later use.</p>
+
+<p>First we will create the model first by running the following in the terminal.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate model email_catcher email:string
+</code></pre></div></div>
+
+<p>Open the <code class="highlighter-rouge">email_catcher.rb</code> and add the validation for email. You can others like checking if a valid email format or uniqueness. For this example we will just confirm that they submitted an email.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">validates</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+</code></pre></div></div>
+
+<p>Next run the migration.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails db:migrate
+</code></pre></div></div>
+
+<p>We will create an controler called <code class="highlighter-rouge">email_catchers_controller.rb</code> in the <code class="highlighter-rouge">app/controllers/</code> folders. Then add the index action. This way we can see the list of emails in the rails app.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/email_catchers_controller.rb</span>
+<span class="k">class</span> <span class="nc">EmailCatchersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="k">def</span> <span class="nf">index</span>
+    <span class="vi">@emails</span> <span class="o">=</span> <span class="no">EmailCatcher</span><span class="p">.</span><span class="nf">all</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now we can create the index view for the email. In the <code class="highlighter-rouge">app/views/email_catchers</code> create a file called <code class="highlighter-rouge">index.html.erb</code>. Add the following mark up.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- apps/views/email_catchers/index.html.erb --&gt;</span>
+<span class="nt">&lt;div&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>Emails<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;ul&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%</span> <span class="err">@</span><span class="na">emails.each</span> <span class="na">do</span> <span class="err">|</span><span class="na">email</span><span class="err">|</span> <span class="err">%</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;li&gt;&lt;</span><span class="err">%=</span> <span class="na">email.email</span> <span class="err">%</span><span class="nt">&gt;&lt;/li&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%</span> <span class="na">end</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/ul&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Add the route to the <code class="highlighter-rouge">routes.rb</code> file.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">root</span> <span class="s2">"email_catchers#index"</span>
+</code></pre></div></div>
+
+<p>If you start the server <code class="highlighter-rouge">bin/dev</code> then go to <code class="highlighter-rouge">localhost:3000</code> it will show the email catcher index page. Tada! :smile: Nothing new here to see.</p>
+
+<p>We will need to create a JS file to initialize the widget. Create a file called <code class="highlighter-rouge">widget.js</code> in the <code class="highlighter-rouge">app/javascript/</code> folder. Then we add:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/widget.js</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Widget Loaded</span><span class="dl">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Now add the javascript tag at the bottom of <code class="highlighter-rouge">apps/views/email_catchers/index.html.erb</code>. After you add the tag you will want to restart the server.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- apps/views/email_catchers/index.html.erb --&gt;</span>
+...
+<span class="nt">&lt;</span><span class="err">%=</span> <span class="na">javascript_include_tag</span> <span class="err">"</span><span class="na">widget</span><span class="err">"</span> <span class="err">%</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<p>Open the Developer tools in the browser and refresh the page. You should see ‘Widget Loaded’. You may have to restart the rails server.</p>
+
+<p>Here comes the fun part “Turbo”. :smile: We will add a turbo frame to the index.html.erb page to use as test for now. This will be where the email catcher input will be shown.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- apps/views/email_catchers/index.html.erb --&gt;</span>
+<span class="nt">&lt;div&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>Emails<span class="nt">&lt;/h1&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">turbo_frame_tag</span> <span class="err">"</span><span class="na">widget</span><span class="err">"</span> <span class="err">%</span><span class="nt">&gt;</span>
+  ...
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>To get the input to appear we need to add some javascript to call new action from the controller and then return the turbo_stream. While I think this can be done with Javascript’s built in <code class="highlighter-rouge">fetch</code> I am going to use Rails <a href="https://github.com/rails/request.js">request.js</a> for the call. Open the terminal run:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yarn add @rails/request.js
+</code></pre></div></div>
+
+<p>In the <code class="highlighter-rouge">widget.js</code> file import the library, and while here we will add the call to the new action.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/widget.js</span>
+<span class="k">import</span> <span class="p">{</span> <span class="kd">get</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@rails/request.js</span><span class="dl">"</span>
+
+<span class="k">async</span> <span class="kd">function</span> <span class="nx">getEmailForm</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">api/v1/email_catchers/new</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> 
+    <span class="na">responseKind</span><span class="p">:</span> <span class="dl">"</span><span class="s2">turbo-stream</span><span class="dl">"</span>
+  <span class="p">})</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">All Good</span><span class="dl">'</span><span class="p">)</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Not Good</span><span class="dl">'</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="nx">getEmailForm</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>What we are doing here is creating an async function to get the email form. We are using the request.js <code class="highlighter-rouge">get</code> to make the call for the new email form. As you will notice the <code class="highlighter-rouge">responseKind</code> is set to “turbo-stream” which lets the backend (Rails) to respond with a turbo_stream :smile:. For now we will check that request responded with an OK. For the endpoint you will see that we have it namespaced with <code class="highlighter-rouge">api/v1/</code> this is something we need to put in place now.</p>
+
+<p>Start by creating the <code class="highlighter-rouge">api</code> folder in the <code class="highlighter-rouge">controllers</code> folder and then inside the <code class="highlighter-rouge">api</code> folder create the <code class="highlighter-rouge">v1</code> folder.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>controllers/
+  |-- api/
+    |-- v1/
+</code></pre></div></div>
+
+<p>Next create the <code class="highlighter-rouge">email_catchers_controller.rb</code> inside <code class="highlighter-rouge">v1</code> folder and add the following action.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/api/v1/email_catchers_controller.rb</span>
+<span class="k">class</span> <span class="nc">Api::V1::EmailCatchersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="k">def</span> <span class="nf">new</span>
+    <span class="vi">@email_catcher</span> <span class="o">=</span> <span class="no">EmailCatcher</span><span class="p">.</span><span class="nf">new</span>
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">turbo_stream</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You will now need to create the view. So following the same namespacing as the controller you will need to create the <code class="highlighter-rouge">api</code> and <code class="highlighter-rouge">v1</code> folder under the <code class="highlighter-rouge">view</code> folder. Then create an <code class="highlighter-rouge">email_catchers</code> folder inside the <code class="highlighter-rouge">v1</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>views/
+  |-- api/
+    |-- v1/
+      |-- email_catchers/
+</code></pre></div></div>
+
+<p>Inside the <code class="highlighter-rouge">email_catchers</code> folder create the <code class="highlighter-rouge">new.turbo_stream.erb</code> file. We will leave it empty for now. The last thing to do before we test this in the browser is the routes. Add the following to the <code class="highlighter-rouge">routes.rb</code> file.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/routes.rb</span>
+<span class="n">namespace</span> <span class="ss">:api</span> <span class="k">do</span>
+  <span class="n">namespace</span> <span class="ss">:v1</span> <span class="k">do</span>
+    <span class="n">resources</span> <span class="ss">:email_catchers</span><span class="p">,</span> <span class="ss">only: </span><span class="sx">%i[ new create ]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="o">...</span>
+</code></pre></div></div>
+
+<p>This should allow us to test the getEmailForm function. Open the developer tools and refresh page. If everything works you should see the the ‘All Good’ console.log.</p>
+
+<p>One thing to note if you look at the rails logs you will see that the <code class="highlighter-rouge">new</code> action processing as TURBO_STREAM</p>
+
+<p><img src="/src/images/rails-log-turbo-stream.png" alt="rails log turbo stream" /></p>
+
+<p>Now lets get the form to show up. First we need to add the following to the <code class="highlighter-rouge">new.turbo_stream.erb</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/api/v1/email_catchers/new.turbo_stream.erb</span>
+<span class="o">&lt;</span><span class="sx">%= turbo_stream.update "widget" do %&gt;
+  &lt;%=</span> <span class="n">render</span> <span class="s2">"form"</span><span class="p">,</span> <span class="ss">email_catcher: </span><span class="vi">@email_catcher</span> <span class="o">%&gt;</span>
+<span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</code></pre></div></div>
+
+<p>With this we will update the ‘widget’ turbo_frame_tag that is on the page and insert the  email form. Next we can create the email form. In the same folder as the <code class="highlighter-rouge">new.turbo_stream.erb</code> create a <code class="highlighter-rouge">_form.html.erb</code> partial. Add the following to the form page</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/api/v1/email_catchers/_form.html.erb
+<span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form_with</span><span class="err">(</span><span class="na">model:</span> <span class="na">email_catcher</span><span class="err">,</span> <span class="na">url:</span> <span class="na">api_v1_email_catchers_path</span><span class="err">)</span> <span class="na">do</span> <span class="err">|</span><span class="na">form</span><span class="err">|</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%</span> <span class="na">if</span> <span class="na">email_catcher.errors.any</span><span class="err">?</span> <span class="err">%</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"color: red"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;h2&gt;&lt;</span><span class="err">%=</span> <span class="na">pluralize</span><span class="err">(</span><span class="na">email_catcher.errors.count</span><span class="err">,</span> <span class="err">"</span><span class="na">error</span><span class="err">")</span> <span class="err">%</span><span class="nt">&gt;</span> prohibited this email from being saved:<span class="nt">&lt;/h2&gt;</span>
+      <span class="nt">&lt;ul&gt;</span>
+        <span class="nt">&lt;</span><span class="err">%</span> <span class="na">email_catcher.errors.each</span> <span class="na">do</span> <span class="err">|</span><span class="na">error</span><span class="err">|</span> <span class="err">%</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;li&gt;&lt;</span><span class="err">%=</span> <span class="na">error.full_message</span> <span class="err">%</span><span class="nt">&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;</span><span class="err">%</span> <span class="na">end</span> <span class="err">%</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%</span> <span class="na">end</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form.label</span> <span class="na">:email</span> <span class="err">%</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form.text_field</span> <span class="na">:email</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form.submit</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;</span><span class="err">%</span> <span class="na">end</span> <span class="err">%</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<p>Now if you refresh the page you should see the form, and in the console ‘All Good’. Note if you click the submit button it will show <strong>Content missing</strong>. This is to be expected because we still need to create the create action. Let’s do that now. Open the <code class="highlighter-rouge">email_catchers_controller.rb</code> and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/api/v1/email_catchers_controller.rb</span>
+<span class="o">...</span>
+
+<span class="k">def</span> <span class="nf">create</span>
+  <span class="vi">@email_catcher</span> <span class="o">=</span> <span class="no">EmailCatcher</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">email_catcher_params</span><span class="p">)</span>
+
+  <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+    <span class="k">if</span> <span class="vi">@email_catcher</span><span class="p">.</span><span class="nf">save</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">turbo_stream</span>
+    <span class="k">else</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">turbo_stream</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:new</span> <span class="p">}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="kp">private</span>
+
+<span class="k">def</span> <span class="nf">email_catcher_params</span>
+  <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:email_catcher</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:email</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Almost standard stuff here. It will try to save the email, and respond with a turbo_stream. Create an <code class="highlighter-rouge">create.turbo_stream.erb</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/api/v1/email_catchers/create.turbo_stream.erb</span>
+<span class="o">&lt;</span><span class="sx">%= turbo_stream.update "widget" do %&gt;
+  &lt;%=</span> <span class="n">render</span> <span class="s2">"form"</span><span class="p">,</span> <span class="ss">email_catcher: </span><span class="no">EmailCatcher</span><span class="p">.</span><span class="nf">new</span> <span class="sx">%&gt;
+&lt;% end %&gt;</span>
+</code></pre></div></div>
+
+<p>If you submit an without an email you should get an error message. If you submit an email then a new blank form is shown. There is one change I would like to make and that is to control the form submission by using Stimulus. The reason is that if we leave it, as is, when we use the widget on an external website and click submit it will try to navigate away to the main rails app.</p>
+
+<p>Rails has a generator for creating Stimulus controllers so we will use that.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate stimulus widget_form
+</code></pre></div></div>
+
+<p>This will create a <code class="highlighter-rouge">widget_form_controller.js</code> in the <code class="highlighter-rouge">app/javascript/controllers/</code> folder and update the <code class="highlighter-rouge">index.js</code> file in the same folder to register the controller. Open the <code class="highlighter-rouge">widget_form_controller.js</code>, and add the following to the connect function.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/controllers/widget_form_controller.js</span>
+<span class="nx">connect</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">connect</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Next add the following to the email catcher form to connect the controller to the form.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code># app/views/api/v1/email_catchers/_form.html.erb
+<span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form_with</span><span class="err">(</span><span class="na">model:</span> <span class="na">email_catcher</span><span class="err">,</span> 
+                <span class="na">url:</span> <span class="na">api_v1_email_catchers_path</span><span class="err">,</span>
+                <span class="na">data:</span> <span class="err">{</span> <span class="na">controller:</span> <span class="err">"</span><span class="na">widget-form</span><span class="err">"</span> <span class="err">})</span> <span class="na">do</span> <span class="err">|</span><span class="na">form</span><span class="err">|</span> <span class="err">%</span><span class="nt">&gt;</span>
+...
+</code></pre></div></div>
+
+<p>If you refresh the page you should see ‘connect’ in the console. Next we need to take care of the form submit. We will make one last update to the email catcher form.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%=</span> <span class="na">form_with</span><span class="err">(</span><span class="na">model:</span> <span class="na">email_catcher</span><span class="err">,</span> 
+                <span class="na">url:</span> <span class="na">api_v1_email_catchers_path</span><span class="err">,</span>
+                <span class="na">data:</span> <span class="err">{</span> 
+                  <span class="na">controller:</span> <span class="err">"</span><span class="na">widget-form</span><span class="err">",</span>
+                  <span class="na">action:</span> <span class="err">"</span><span class="na">submit-</span><span class="nt">&gt;</span>widget-form#submitForm:prevent",
+                  widget_form_target: "form" }) do |form| %&gt;
+...
+</code></pre></div></div>
+
+<p>We added the action and target. The action is stating that when the form is submitted use the submitForm function instead. Also the “prevent” at the end is the same using element.preventDefault(). Now update the <code class="highlighter-rouge">widget_form_controller.js</code>.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/controllers/widget_form_controller.js</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">post</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@rails/request.js</span><span class="dl">"</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Controller</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@hotwired/stimulus</span><span class="dl">"</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="kd">extends</span> <span class="nx">Controller</span> <span class="p">{</span>
+  <span class="kd">static</span> <span class="nx">targets</span> <span class="o">=</span> <span class="p">[</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span><span class="p">]</span>
+
+  <span class="k">async</span> <span class="nx">submitForm</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">FormData</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">formTarget</span><span class="p">)</span>
+    <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">post</span><span class="p">(</span><span class="dl">"</span><span class="s2">http://localhost:3000/api/v1/email_catchers/</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">responseKind</span><span class="p">:</span> <span class="dl">"</span><span class="s2">turbo_stream</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">body</span><span class="p">:</span> <span class="nx">data</span>
+    <span class="p">})</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">OK</span><span class="dl">'</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">ERROR</span><span class="dl">'</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>If you test out the email submission it will send, save the email, and replace with a new empty email form should appear. It behaves just like before but this time the form submission is going through the stimulus controller.</p>
+
+<p>Since we are using Turbo and Stimulus we need to make a change to our <code class="highlighter-rouge">widget.js</code> file. The reason is that external websites may or may not be using these libraries and they will need to be loaded in if not. The other change is the request URL. We need to change to include the backends domain. In this case <code class="highlighter-rouge">http://localhost:3000/...</code></p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/widget.js</span>
+<span class="k">import</span> <span class="p">{</span> <span class="kd">get</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@rails/request.js</span><span class="dl">"</span>
+<span class="k">import</span> <span class="dl">"</span><span class="s2">@hotwired/turbo-rails</span><span class="dl">"</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Application</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@hotwired/stimulus</span><span class="dl">"</span>
+<span class="k">import</span> <span class="nx">WidgetFormController</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./controllers/widget_form_controller</span><span class="dl">"</span>
+
+<span class="c1">// Load Stimulus</span>
+<span class="kd">const</span> <span class="nx">application</span> <span class="o">=</span> <span class="nx">Application</span><span class="p">.</span><span class="nx">start</span><span class="p">()</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">Stimulus</span> <span class="o">=</span> <span class="nx">application</span>
+<span class="nx">application</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="dl">"</span><span class="s2">widget-form</span><span class="dl">"</span><span class="p">,</span> <span class="nx">WidgetFormController</span><span class="p">)</span>
+
+<span class="c1">// Load Turbo</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">Turbo</span> <span class="o">=</span> <span class="nx">Turbo</span>
+
+<span class="k">async</span> <span class="kd">function</span> <span class="nx">getEmailForm</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="kd">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">http://localhost:3000/api/v1/email_catchers/new</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> 
+    <span class="na">responseKind</span><span class="p">:</span> <span class="dl">"</span><span class="s2">turbo-stream</span><span class="dl">"</span>
+  <span class="p">})</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+<span class="p">...</span>
+</code></pre></div></div>
+
+<p>Now it is time to test outside of the current rails app that it lives in. In order to test outside of the rails you can create a new rails app or do as I did and create a simple Vite website. I also used <a href="https://ngrok.com/">ngrok</a>. Not going to cover how to set this up in this article.</p>
+
+<p>At this point I will assume that you have an external site setup to test with. On the main <code class="highlighter-rouge">index.html</code> file add the following lines within the <code class="highlighter-rouge">&lt;body&gt;</code> tags.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;turbo-frame</span> <span class="na">id=</span><span class="s">"widget"</span><span class="nt">&gt;&lt;/turbo-frame&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">application/javascript</span> <span class="na">src=</span><span class="s">"http://localhost:3000/widget.js"</span><span class="nt">&gt;&lt;/script&gt;</span> 
+</code></pre></div></div>
+
+<p>At this point if you refresh the index page it you will not see a 404 error because it cannot find the <code class="highlighter-rouge">widget.js</code> file. That is because rails adds on a hash to the widget name. There is a ways to take care of this by adding a route and controller, but I am just going to copy the <code class="highlighter-rouge">widget.js</code> from <code class="highlighter-rouge">app/assets/builds/widget.js</code> and paste it in <code class="highlighter-rouge">/public/</code> folder. The downside is that everytime we make a change to the file you will need to re-copy and paste. At this point we have made all the the changes to the <code class="highlighter-rouge">widget.js</code> files so it will be fine to do it this way.</p>
+
+<p>If you refresh now the 404 error should be fixed, but you are getting a different error 😵‍💫. This time it is a CORS error. To fix this we will need to add the <a href="https://github.com/cyu/rack-cors">rack-cors gem</a>. Stop the server and then run the following in the terminal.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle add rack-cors
+</code></pre></div></div>
+
+<p>Next in the <code class="highlighter-rouge">config/initializers/</code> folder create a <code class="highlighter-rouge">cors.rb</code> file and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/cors.rb</span>
+
+<span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">config</span><span class="p">.</span><span class="nf">middleware</span><span class="p">.</span><span class="nf">insert_before</span> <span class="mi">0</span><span class="p">,</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Cors</span> <span class="k">do</span>
+  <span class="n">allow</span> <span class="k">do</span>
+    <span class="n">origins</span> <span class="s1">'*'</span>
+    <span class="n">resource</span> <span class="s1">'/api/*'</span><span class="p">,</span> <span class="ss">headers: :any</span><span class="p">,</span> <span class="ss">methods: </span><span class="p">[</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:post</span><span class="p">,</span> <span class="ss">:patch</span><span class="p">,</span> <span class="ss">:put</span><span class="p">]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This will allow Origin from any website to access our API. If you restared the sever before adding/changing the <code class="highlighter-rouge">cors.rb</code> file you will need to restart the rails server again to load the initializer. Refresh the external website and the input and submit button will appear.🎉</p>
+
+<p>Now try to submit an email. You get a “http://localhost:3000/api/v1/email_catchers/ 422 (Unprocessable Entity)” in the console. 😵 If you look at the sever logs it will show a InvalidAuthenticityToken error. We need to skip this check. Open the the <code class="highlighter-rouge">api/v1/email_catchers_controller.rb</code> and add the following.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/api/v1/email_catchers_controller.rb</span>
+<span class="n">skip_before_action</span> <span class="ss">:verify_authenticity_token</span><span class="p">,</span> <span class="ss">only: </span><span class="sx">%i[ create ]</span>
+
+<span class="o">...</span>
+</code></pre></div></div>
+
+<p>Refresh the external website, and then try to submit an email. Horay! 🎉 You now see a blank form. If you check the rails app there should be the email from the external website. 👏 One last test. We setup an email validation to check if an email is present. Try submitting without an email, and you get the error.</p>
+
+<blockquote>
+  <p>1 error prohibited this email from being saved:</p>
+
+  <ul>
+    <li>Email can’t be blank</li>
+  </ul>
+</blockquote>
+
+<p>If you made it all the way through, great job!</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>This was more of a Proof of concept. To see if/how it could be done using the Turbo and Stimulus. I would like to explore even using this in production, but want to do somemore testing.</p>
+
+    </div>
+  </section>
+</article>
+
+
+    </main>
+
+    <footer class="footer footer-center p-10 bg-gray-600 text-white rounded">
+  <div class="grid grid-flow-col gap-4">
+    <a class="link link-hover">About</a> 
+    <a class="link link-hover">Post</a> 
+    <a class="link link-hover">Projects</a> 
+  </div> 
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <span>
+        <a href="https://github.com/jamgar">GitHub</a>
+      </span>
+    </div>
+  </div> 
+  <div>
+    <p>Copyright © 2022 - All right reserved by James Garcia</p>
+  </div>
+</footer>
+
+  </body>
+</html>
